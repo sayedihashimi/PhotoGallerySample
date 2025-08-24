@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/sln items/">
+    <File Path="Directory.Build.props" />
+  </Folder>
   <Project Path="PhotoGallery.AppHost/PhotoGallery.AppHost.csproj" />
   <Project Path="PhotoGallery.ServiceDefaults/PhotoGallery.ServiceDefaults.csproj" />
   <Project Path="WebApplication1/WebApplication1.csproj" Id="73d9ca5c-b903-42ce-8422-2b2d5cb011d7" />
