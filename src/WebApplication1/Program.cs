@@ -2,11 +2,12 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddRazorComponents();
 var app = builder.Build();
 
-//app.MapGet("/", () =>
-//{
-//    return new RazorComponentResult<PhotoList>(new { Photos = Array.Empty<string>() });
-//});
-
+/*
+app.MapGet("/", () =>
+{
+    return new RazorComponentResult<PhotoList>(new { Photos = Array.Empty<string>() });
+});
+*/
 
 app.Run();
 
