@@ -1,7 +1,15 @@
+using Microsoft.AspNetCore.Http.HttpResults;
+using WebApplication1.Components;
+
 var builder = WebApplication.CreateBuilder(args);
+//builder.Services.AddRazorComponents();
 var app = builder.Build();
 
-app.MapGet("/", () => "Hello World!");
+//app.MapGet("/", () =>
+//{
+//    return new RazorComponentResult<PhotoList>(new { Photos = Array.Empty<string>() });
+//});
+
 
 app.Run();
 
