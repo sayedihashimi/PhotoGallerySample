@@ -1,4 +1,6 @@
-﻿@code
+﻿@* TODO: Antiforgery needs to be added *@
+
+@code
 {
     [Parameter]
     public IEnumerable<string> Photos { get; set; } = [];
