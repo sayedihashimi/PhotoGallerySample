@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/sln items/">
+    <File Path="../assets/PhotoList.razor.txt" />
     <File Path="Directory.Build.props" />
   </Folder>
   <Project Path="PhotoGallery.AppHost/PhotoGallery.AppHost.csproj" />

@@ -1,4 +1,26 @@
-﻿@using Microsoft.AspNetCore.Components.Forms
+﻿@code
+{
+    [Parameter]
+    public IEnumerable<string> Photos { get; set; } = [];
+}
+
+<html>
+<head>
+    <title>Photo List</title>
+</head>
+<body>
+    <script src="/_framework/aspnetcore-browser-refresh.js"></script>
+    <ul>
+        @foreach (var photo in Photos)
+        {
+            <li>@photo</li>
+        }
+    </ul>
+</body>
+</html>
+
+
+@* @using Microsoft.AspNetCore.Components.Forms
 @code
 {
     [Parameter]
@@ -34,3 +56,4 @@
 </body>
 </html>
 
+ *@

@@ -7,12 +7,4 @@
 		<HotReloadAutoRestart>true</HotReloadAutoRestart>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Aspire.Azure.Storage.Blobs" Version="9.3.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\PhotoGallery.ServiceDefaults\PhotoGallery.ServiceDefaults.csproj" />
-  </ItemGroup>
-
 </Project>
