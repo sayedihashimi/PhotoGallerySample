@@ -6,8 +6,8 @@
 5. App Host: `Add Project Reference` to `WebApplication1`
     - `dotnet add reference src\WebApplication1\WebApplication1.csproj`
 6. Save All in VS
-7. AppHost project - Add NuGet pkg reference to `Aspire.Hosting.Azure.Storage` (version `9.3`)
-    - `dotnet add package Aspire.Hosting.Azure.Storage -v 9.3.0`
+7. AppHost project - Add NuGet pkg reference to `Aspire.Hosting.Azure.Storage` (version `9.5.0-preview.1.25466.2`)
+    - `dotnet add package Aspire.Hosting.Azure.Storage -v 9.5.0-preview.1.25466.2`
     - Note: version must match the version of `Aspire.Hosting.AppHost`
 
 8. `AppHost.cs` add after `var builder = …`
@@ -88,9 +88,8 @@ app.MapGet("/", () =>
 
 16. The title of the web page should be “Photo List”
 17. View dashboard there shouldn’t be any errors
-18. WebApp1 Add NuGet Pkg ref to `Aspire.Azure.Storage.Blobs` - `dotnet add package Aspire.Azure.Storage.Blobs -v 9.3.0`
-    - Version must match the version of `Aspire.Hosting.Azure.Storage` in AppHost project. In my case it was `9.3.0`. If you use `9.4.0` you get a runtime error 
-    > “InvalidOperationException: A BlobServiceClient could not be configured. Ensure valid connection information was provided in 'ConnectionStrings:photos' or specify a 'ConnectionString' or 'ServiceUri' in the 'Aspire:Azure:Storage:Blobs' configuration section.”
+18. WebApp1 Add NuGet Pkg ref to `Aspire.Azure.Storage.Blobs` - `dotnet add package Aspire.Azure.Storage.Blobs -v 9.5.0-preview.1.25466.2`
+    - Version must match the version of `Aspire.Hosting.Azure.Storage` in AppHost project. In my case it was `9.5.0-preview.1.25466.2`. If you use a different version you may get a runtime error.
 
 19. AppHost.cs – add after `var photos = …`
 
