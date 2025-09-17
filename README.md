@@ -1,4 +1,17 @@
-# Demo Steps
+# PhotoGallary Setup
+
+## Prereqs
+1. Install the [latest dotnet](https://github.com/dotnet/dotnet/blob/main/docs/builds-table.md)
+1. Install the [latest daily aspire ](https://github.com/dotnet/aspire/blob/main/docs/using-latest-daily.md)
+
+## Getting started
+You can either follow the steps below to start from scratch below. Or you can start with the code in the [start-here](https://github.com/sayedihashimi/PhotoGallerySample/tree/start-here) branch.
+The `start-here` branch has comments for all the code that will be added. 
+There is also a [PhotoList.razor.txt](assets/PhotoList.razor.txt) in the assets folder. This is a version of the PhotoList.razor file that has code
+to get started and some commented out code that you
+can paste in later.
+
+## Demo Steps
 1. Create Aspire Empty App – named `PhotoGallery`
 2. Add new project: ASP.NET Core Empty (9.0) – named `WebApplication1`
 3. F5
@@ -8,6 +21,7 @@
 6. Save All in VS
 7. AppHost project - Add NuGet pkg reference to `Aspire.Hosting.Azure.Storage` (version `9.5.0-preview.1.25466.2`)
     - `dotnet add package Aspire.Hosting.Azure.Storage -v 9.5.0-preview.1.25466.2`
+    - Adjust the version number as needed
     - Note: version must match the version of `Aspire.Hosting.AppHost`
 
 8. `AppHost.cs` add after `var builder = …`
@@ -89,7 +103,8 @@ app.MapGet("/", () =>
 16. The title of the web page should be “Photo List”
 17. View dashboard there shouldn’t be any errors
 18. WebApp1 Add NuGet Pkg ref to `Aspire.Azure.Storage.Blobs` - `dotnet add package Aspire.Azure.Storage.Blobs -v 9.5.0-preview.1.25466.2`
-    - Version must match the version of `Aspire.Hosting.Azure.Storage` in AppHost project. In my case it was `9.5.0-preview.1.25466.2`. If you use a different version you may get a runtime error.
+    - Adjust the version number as needed
+    - Version must match the version of `Aspire.Hosting.Azure.Storage` in AppHost project.
 
 19. AppHost.cs – add after `var photos = …`
 
