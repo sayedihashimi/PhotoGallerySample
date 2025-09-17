@@ -6,10 +6,10 @@
 
 ## Getting started
 You can either follow the steps below to start from scratch below. Or you can start with the code in the [start-here](https://github.com/sayedihashimi/PhotoGallerySample/tree/start-here) branch.
+When using the `start-here` branch, start with step 3 below.
 The `start-here` branch has comments for all the code that will be added. 
-There is also a [PhotoList.razor.txt](assets/PhotoList.razor.txt) in the assets folder. This is a version of the PhotoList.razor file that has code
-to get started and some commented out code that you
-can paste in later.
+There is also a [PhotoList.razor.txt](assets/PhotoList.razor.txt) in the assets folder. This is a version of the
+PhotoList.razor file that has code to get started and some commented out code that you can paste in later.
 
 ## Demo Steps
 1. Create Aspire Empty App – named `PhotoGallery`
