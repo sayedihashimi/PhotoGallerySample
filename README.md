@@ -72,8 +72,9 @@ app.MapGet("/", () =>
     return new RazorComponentResult<PhotoList>(new {Photos = Array.Empty<string>() } );
 });
 ```
-
-  - This should add a reference -- `using WebApplication1.Components;`
+Note: if you paste this code in VS it should add the following using statements.
+- `using WebApplication1.Components;`
+- `using Microsoft.AspNetCore.Http.HttpResults;`
 
 15. PhotoList.razor update with the following
 
