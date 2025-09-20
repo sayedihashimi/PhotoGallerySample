@@ -104,7 +104,7 @@ PhotoList.razor file that has code to get started and some commented out code th
     - `dotnet add package Aspire.Azure.Storage.Blobs --prerelease`
     - Adjust the version number as needed
     - Version must match the version of `Aspire.Hosting.Azure.Storage` in AppHost project.
-20. `AppHost.cs` – add after `var photos = …`
+20. `AppHost.cs` – replace `builder.AddProject<Projects.PhotoGallery_Web>("webapp");` with
     ```cs
     builder.AddProject<Projects.PhotoGallery_Web>("webapp")
             .WithReference(photos)
