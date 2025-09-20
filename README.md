@@ -22,9 +22,9 @@ PhotoList.razor file that has code to get started and some commented out code th
    - Template version: `daily`
 3. Run `aspire update`
    - Channel: `daily`
-4. `dotnet new webapp -o PhotoGallery.Web` to create the Razor Pages web app. In VS select `ASP.NET Core Empty (9.0)` as the project template.
+4. `dotnet new web -o PhotoGallery.Web -f net9.0` to create the Razor Pages web app. In VS select `ASP.NET Core Empty (9.0)` as the project template.
 5. Run `dotnet watch` or `F5`/`CTRL-F5` in Visual Studio.
-6. Dashboard should show “No Resources Found”
+6. Dashboard should show "No Resources Found"
 7. AppHost: `Add Project Reference` to `PhotoGallery.Web`
     - `dotnet add reference src\PhotoGallery.Web\PhotoGallery.Web.csproj`
 8. AppHost: Add NuGet pkg reference to `Aspire.Hosting.Azure.Storage`
@@ -33,22 +33,22 @@ PhotoList.razor file that has code to get started and some commented out code th
     - Note: version must match the version of `Aspire.Hosting.AppHost`
 9. `AppHost.cs` add after `var builder = …`
 ```cs
-builder.AddProject<Projects.PhotoGallery.Web>(“webapp”);
+builder.AddProject<Projects.PhotoGallery_Web>("webapp");
 ```
-10. Dashboard should show "webapp" and it should get to running state.
-11. AppHost.cs – add code directly below `var builder = …`
+1.  Dashboard should show "webapp" and it should get to running state.
+2.  AppHost.cs – add code directly below `var builder = …`
 ```cs
 var photos = builder.AddAzureStorage("storage")
                     .RunAsEmulator()
                     .AddBlobs("blobs")
                     .AddBlobContainer("photos");
 ```
-12. `PG.Web.Program.cs` – add after the first line (`var builder = …`)
+1.  `PG.Web.Program.cs` – add after the first line (`var builder = …`)
 ```cs
 builder.Services.AddRazorComponents();
 ```
-13. PG.Web: Add `Components` folder
-13. PG.Web: Add new file `Components\PhotoList.razor` with the contents below.
+1.  PG.Web: Add `Components` folder
+2.  PG.Web: Add new file `Components\PhotoList.razor` with the contents below.
 ```
 @code
 {
@@ -97,23 +97,23 @@ Note: if you paste this code in VS it should add the following using statements.
     </body>
 </html>
 ```
-16. The title of the web page should be “Photo List”
-17. View dashboard there shouldn’t be any errors
-18. PG.Web Add NuGet Pkg ref to `Aspire.Azure.Storage.Blobs`
+1.  The title of the web page should be "Photo List"
+2.  View dashboard there shouldn’t be any errors
+3.  PG.Web Add NuGet Pkg ref to `Aspire.Azure.Storage.Blobs`
     - `dotnet add package Aspire.Azure.Storage.Blobs --prerelease`
     - Adjust the version number as needed
     - Version must match the version of `Aspire.Hosting.Azure.Storage` in AppHost project.
-19. AppHost.cs – add after `var photos = …`
+4.  AppHost.cs – add after `var photos = …`
 ```cs
-builder.AddProject<Projects.PhotoGallery.Web>("webapp")
+builder.AddProject<Projects.PhotoGallery_Web>("webapp")
         .WithReference(photos)
         .WaitFor(photos);
 ```
-20. `PG.Web.Program.cs` add after `var builder = …`
+1.  `PG.Web.Program.cs` add after `var builder = …`
 ```cs
 builder.AddAzureBlobContainerClient("photos");
 ```
-21. `PG.Web.Program.cs` update `app.MapGet` to be the following. Note it will need this using statement to work `using Azure.Storage.Blobs;`
+1.  `PG.Web.Program.cs` update `app.MapGet` to be the following. Note it will need this using statement to work `using Azure.Storage.Blobs;`
 
 ```cs
 app.MapGet("/", async (BlobContainerClient client) =>
