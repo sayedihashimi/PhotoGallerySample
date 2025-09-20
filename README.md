@@ -1,5 +1,7 @@
 # PhotoGallary Setup
 
+The final version of the code is at https://github.com/sayedihashimi/PhotoGallerySample/tree/main.
+
 ## Prereqs
 1. Install the [latest dotnet](https://github.com/dotnet/dotnet/blob/main/docs/builds-table.md)
 1. Install the [latest daily aspire ](https://github.com/dotnet/aspire/blob/main/docs/using-latest-daily.md)
@@ -12,43 +14,41 @@ There is also a [PhotoList.razor.txt](assets/PhotoList.razor.txt) in the assets 
 PhotoList.razor file that has code to get started and some commented out code that you can paste in later.
 
 ## Demo Steps
-1. Create Aspire Empty App – named `PhotoGallery`
-2. Add new project: ASP.NET Core Empty (9.0) – named `WebApplication1`
-3. F5
-4. Dashboard should show “No Resources Found”
-5. App Host: `Add Project Reference` to `WebApplication1`
+1. Create, or open, an empty folder.
+2. Create Aspire projects with `aspire new`.
+   - Template:  `AppHost and service defaults`
+   - Name: `PhotoGallery`
+   - Path: `.\`
+   - Template version: `daily`
+3. Run `aspire update`
+   - Channel: `daily`
+4. `dotnet new webapp -o WebApplication1` to create the Razor Pages web app. In VS select `ASP.NET Core Empty (9.0)` as the project template.
+5. Run `dotnet watch` or `F5`/`CTRL-F5` in Visual Studio.
+6. Dashboard should show “No Resources Found”
+7. AppHost: `Add Project Reference` to `WebApplication1`
     - `dotnet add reference src\WebApplication1\WebApplication1.csproj`
-6. Save All in VS
-7. AppHost project - Add NuGet pkg reference to `Aspire.Hosting.Azure.Storage` (version `9.5.0-preview.1.25466.2`)
-    - `dotnet add package Aspire.Hosting.Azure.Storage -v 9.5.0-preview.1.25466.2`
+8. AppHost: Add NuGet pkg reference to `Aspire.Hosting.Azure.Storage`
+    - `dotnet add package Aspire.Hosting.Azure.Storage --prerelease`
     - Adjust the version number as needed
     - Note: version must match the version of `Aspire.Hosting.AppHost`
-
-8. `AppHost.cs` add after `var builder = …`
-
+9. `AppHost.cs` add after `var builder = …`
 ```cs
 builder.AddProject<Projects.WebApplication1>(“webapp”);
 ```
-
-9. Dashboard should show webapp1 and it should get to running state.
-10. AppHost.cs – add code directly below `var builder = …`
-
+10. Dashboard should show webapp1 and it should get to running state.
+11. AppHost.cs – add code directly below `var builder = …`
 ```cs
 var photos = builder.AddAzureStorage("storage")
-.RunAsEmulator()
-.AddBlobs("blobs")
-.AddBlobContainer("photos");
+                    .RunAsEmulator()
+                    .AddBlobs("blobs")
+                    .AddBlobContainer("photos");
 ```
-
-11. WebApplication1.Program.cs – add after the first line (`var builder = …`)
-
+12. WebApplication1.Program.cs – add after the first line (`var builder = …`)
 ```cs
 builder.Services.AddRazorComponents();
 ```
-
-12. WebApp1: Add `Components` folder
+13. WebApp1: Add `Components` folder
 13. WebApp1: Add new file `Components\PhotoList.razor` with the contents below.
-
 ```
 @code
 {
@@ -63,9 +63,7 @@ builder.Services.AddRazorComponents();
     }
 </ul>
 ```
-
 14. `WebApp1.Program.cs` update app.MapGet to be the following
-
 ```
 app.MapGet("/", () => 
 {
@@ -76,8 +74,7 @@ Note: if you paste this code in VS it should add the following using statements.
 - `using WebApplication1.Components;`
 - `using Microsoft.AspNetCore.Http.HttpResults;`
 
-15. PhotoList.razor update with the following
-
+15. `PhotoList.razor` update with the following
 ```
 @code
 {
@@ -100,28 +97,23 @@ Note: if you paste this code in VS it should add the following using statements.
     </body>
 </html>
 ```
-
 16. The title of the web page should be “Photo List”
 17. View dashboard there shouldn’t be any errors
-18. WebApp1 Add NuGet Pkg ref to `Aspire.Azure.Storage.Blobs` - `dotnet add package Aspire.Azure.Storage.Blobs -v 9.5.0-preview.1.25466.2`
+18. WebApp1 Add NuGet Pkg ref to `Aspire.Azure.Storage.Blobs`
+    - `dotnet add package Aspire.Azure.Storage.Blobs --prerelease`
     - Adjust the version number as needed
     - Version must match the version of `Aspire.Hosting.Azure.Storage` in AppHost project.
-
 19. AppHost.cs – add after `var photos = …`
-
 ```cs
 builder.AddProject<Projects.WebApplication1>("webapp")
         .WithReference(photos)
         .WaitFor(photos);
 ```
-
-20. WebApp1.Program.cs add after `var builder = …`
-
+20. `WebApp1.Program.cs` add after `var builder = …`
 ```cs
 builder.AddAzureBlobContainerClient("photos");
 ```
-
-21. WebApp1.Program.cs update `app.MapGet` to be the following. Note it will need this using statement to work `using Azure.Storage.Blobs;`
+21. `WebApp1.Program.cs` update `app.MapGet` to be the following. Note it will need this using statement to work `using Azure.Storage.Blobs;`
 
 ```cs
 app.MapGet("/", async (BlobContainerClient client) =>
@@ -135,9 +127,8 @@ app.MapGet("/", async (BlobContainerClient client) =>
     return new RazorComponentResult<PhotoList>(new {Photos = photos } );
 });
 ```
-
-22. WebApp1.PhotoList.razor – replace with the code below
-
+- This requires the using statement `using Azure.Storage.Blobs;`.
+22. `WebApp1.PhotoList.razor` – replace with the code below
 ```
 @code
 {
@@ -173,23 +164,17 @@ app.MapGet("/", async (BlobContainerClient client) =>
 </body>
 </html>
 ```
-
-23. WebApp1 add Project Reference to ServiceDefaults project
+23. WebApp1: add Project Reference to ServiceDefaults project
     - `dotnet add reference src\PhotoGallery.ServiceDefaults\PhotoGallery.ServiceDefaults.csproj`
-24. WebApp1.Program.cs add after `var builder = …`
-
+24. `WebApp1.Program.cs` add after `var builder = …`
 ```cs
 builder.AddServiceDefaults();
 ```
-
-25. WebApp1.Program.cs add after `var app = builder.Build()`
-
+25. `WebApp1.Program.cs` add after `var app = builder.Build()`
 ```cs
 app.MapDefaultEndpoints();
 ```
-
-26. WebApp1.Program.cs add after `app.MapGet …`
-
+26. `WebApp1.Program.cs` add after `app.MapGet …`
 ```
 app.MapPost("/upload", async (IFormFile photo, BlobContainerClient client) =>
 {
@@ -202,28 +187,19 @@ app.MapPost("/upload", async (IFormFile photo, BlobContainerClient client) =>
     return Results.Redirect("/");
 });
 ```
-
 27. Verify in the dashboard that Traces has webapp1 showing up in the Resource dropdown.
-28. If you try WebApp1, you’ll get antiforgery errors
-29. WebApp1.Program.cs – add before `var app = builder.Build();`
-
+28. If you try WebApp1, you’ll get antiforgery errors. The exception should be in Structured logs in the dashboard.
+29. `WebApp1.Program.cs` – add before `var app = builder.Build();`
 ```cs
 builder.Services.AddAntiforgery();
 ```
-
-30. WebApp1.Program.cs – add after `var app = builder.Build()`
-
+30. `WebApp1.Program.cs` – add after `var app = builder.Build()`
 ```cs
 app.UseAntiforgery();
 ```
-
-31. WebApp1.PhotoList.razor – add immediately after opening `<form>` tag.
-
+31. `WebApp1.PhotoList.razor` – add immediately after opening `<form>` tag.
 ```html
 <AntiforgeryToken />
 ```
-
-32. Note: the previous step should have added a using statement in PhotoList.razor
-@using Microsoft.AspNetCore.Components.Forms
-• Issue: Missing using statements aren’t getting added when editing .razor files. They are getting added when editing .cs files.
-33. The app should be working, after uploading an image, the file name should be listed on the web page.
+ - This requires the using statement `@using Microsoft.AspNetCore.Components.Forms`.
+32. The app should be working, after uploading an image, the file name should be listed on the web page.
