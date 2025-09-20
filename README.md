@@ -32,174 +32,174 @@ PhotoList.razor file that has code to get started and some commented out code th
     - Adjust the version number as needed
     - Note: version must match the version of `Aspire.Hosting.AppHost`
 9. `AppHost.cs` add after `var builder = …`
-```cs
-builder.AddProject<Projects.PhotoGallery_Web>("webapp");
-```
-1.  Dashboard should show "webapp" and it should get to running state.
-2.  AppHost.cs – add code directly below `var builder = …`
-```cs
-var photos = builder.AddAzureStorage("storage")
-                    .RunAsEmulator()
-                    .AddBlobs("blobs")
-                    .AddBlobContainer("photos");
-```
-1.  `PG.Web.Program.cs` – add after the first line (`var builder = …`)
-```cs
-builder.Services.AddRazorComponents();
-```
-1.  PG.Web: Add `Components` folder
-2.  PG.Web: Add new file `Components\PhotoList.razor` with the contents below.
-```
-@code
-{
-    [Parameter]
-    public IEnumerable<string> Photos{get;set;} = [];
-}
- 
-<ul>
-    @foreach(var photo in Photos)
+    ```cs
+    builder.AddProject<Projects.PhotoGallery_Web>("webapp");
+    ```
+10. Dashboard should show "webapp" and it should get to running state.
+11. AppHost.cs – add code directly below `var builder = …`
+    ```cs
+    var photos = builder.AddAzureStorage("storage")
+                        .RunAsEmulator()
+                        .AddBlobs("blobs")
+                        .AddBlobContainer("photos");
+    ```
+12. `PG.Web.Program.cs` – add after the first line (`var builder = …`)
+    ```cs
+    builder.Services.AddRazorComponents();
+    ```
+13. PG.Web: Add `Components` folder
+14. PG.Web: Add new file `Components\PhotoList.razor` with the contents below.
+    ```
+    @code
     {
-        <li>@photo</li>
+        [Parameter]
+        public IEnumerable<string> Photos{get;set;} = [];
     }
-</ul>
-```
-14. `PG.Web.Program.cs` update app.MapGet to be the following
-```
-app.MapGet("/", () => 
-{
-    return new RazorComponentResult<PhotoList>(new {Photos = Array.Empty<string>() } );
-});
-```
-Note: if you paste this code in VS it should add the following using statements.
-- `using PhotoGallery.Web.Components;`
-- `using Microsoft.AspNetCore.Http.HttpResults;`
-
-15. `PhotoList.razor` update with the following
-```
-@code
-{
-    [Parameter]
-    public IEnumerable<string> Photos{get;set;} = [];
-}
-
-<html>
-    <head>
-        <title>Photo List</title>
-    </head>
-    <body>
-    <script src="/_framework/aspnetcore-browser-refresh.js"></script>
+    
     <ul>
-            @foreach(var photo in Photos)
-            {
-                <li>@photo</li>
-            }
-    </ul>
-    </body>
-</html>
-```
-1.  The title of the web page should be "Photo List"
-2.  View dashboard there shouldn’t be any errors
-3.  PG.Web Add NuGet Pkg ref to `Aspire.Azure.Storage.Blobs`
-    - `dotnet add package Aspire.Azure.Storage.Blobs --prerelease`
-    - Adjust the version number as needed
-    - Version must match the version of `Aspire.Hosting.Azure.Storage` in AppHost project.
-4.  AppHost.cs – add after `var photos = …`
-```cs
-builder.AddProject<Projects.PhotoGallery_Web>("webapp")
-        .WithReference(photos)
-        .WaitFor(photos);
-```
-1.  `PG.Web.Program.cs` add after `var builder = …`
-```cs
-builder.AddAzureBlobContainerClient("photos");
-```
-1.  `PG.Web.Program.cs` update `app.MapGet` to be the following. Note it will need this using statement to work `using Azure.Storage.Blobs;`
-
-```cs
-app.MapGet("/", async (BlobContainerClient client) =>
-{
-    var blobs = client.GetBlobsAsync();
-    var photos = new List<string>();
-    await foreach(var photo in blobs)
-    {
-        photos.Add(photo.Name);
-    }
-    return new RazorComponentResult<PhotoList>(new {Photos = photos } );
-});
-```
-- This requires the using statement `using Azure.Storage.Blobs;`.
-22. `PG.Web.PhotoList.razor` – replace with the code below
-```
-@code
-{
-    [Parameter]
-    public IEnumerable<string> Photos { get; set; } = [];
-}
-
-<html>
-<head>
-    <title>Photo List</title>
-</head>
-<body>
-    <script src="/_framework/aspnetcore-browser-refresh.js"></script>
-
-    <div>
-        <form action="/upload" method="post" enctype="multipart/form-data">
-            <div>
-                <label for="photo">Choose photo:</label>
-                <input type="file" id="photo" name="photo" accept="image/*" required > 
-            </div>
-            <div>
-                <button type="submit">Upload Photo</button>
-            </div>
-        </form>
-    </div>
-
-    <ul>
-        @foreach (var photo in Photos)
+        @foreach(var photo in Photos)
         {
             <li>@photo</li>
         }
     </ul>
-</body>
-</html>
-```
-23. PG.Web: add Project Reference to ServiceDefaults project
-    - `dotnet add reference src\PhotoGallery.ServiceDefaults\PhotoGallery.ServiceDefaults.csproj`
-24. `PG.Web.Program.cs` add after `var builder = …`
-```cs
-builder.AddServiceDefaults();
-```
-25. `PG.Web.Program.cs` add after `var app = builder.Build()`
-```cs
-app.MapDefaultEndpoints();
-```
-26. `PG.Web.Program.cs` add after `app.MapGet …`
-```
-app.MapPost("/upload", async (IFormFile photo, BlobContainerClient client) =>
-{
-    if (photo.Length > 0)
+    ```
+15. `PG.Web.Program.cs` update app.MapGet to be the following
+    ```
+    app.MapGet("/", () => 
     {
-        var blobClient = client.GetBlobClient(photo.FileName);
-        await blobClient.UploadAsync(photo.OpenReadStream(), true);
+        return new RazorComponentResult<PhotoList>(new {Photos = Array.Empty<string>() } );
+    });
+    ```
+    Note: if you paste this code in VS it should add the following using statements.
+    ```
+    using PhotoGallery.Web.Components;
+    using Microsoft.AspNetCore.Http.HttpResults;
+    ```    
+16. `PhotoList.razor` update with the following
+    ```
+    @code
+    {
+        [Parameter]
+        public IEnumerable<string> Photos{get;set;} = [];
     }
- 
-    return Results.Redirect("/");
-});
-```
-27. Verify in the dashboard that Traces has webapp showing up in the Resource dropdown.
-28. If you try webapp, you’ll get antiforgery errors. The exception should be in Structured logs in the dashboard.
-29. `PG.Web.Program.cs` – add before `var app = builder.Build();`
-```cs
-builder.Services.AddAntiforgery();
-```
-30. `PG.Web.Program.cs` – add after `var app = builder.Build()`
-```cs
-app.UseAntiforgery();
-```
-31. `PG.Web.PhotoList.razor` – add immediately after opening `<form>` tag.
-```html
-<AntiforgeryToken />
-```
+
+    <html>
+        <head>
+            <title>Photo List</title>
+        </head>
+        <body>
+        <script src="/_framework/aspnetcore-browser-refresh.js"></script>
+        <ul>
+                @foreach(var photo in Photos)
+                {
+                    <li>@photo</li>
+                }
+        </ul>
+        </body>
+    </html>
+    ```
+17. The title of the web page should be "Photo List"
+18. View dashboard there shouldn’t be any errors
+19. `PG.Web` Add NuGet Pkg ref to `Aspire.Azure.Storage.Blobs`
+    - `dotnet add package Aspire.Azure.Storage.Blobs --prerelease`
+    - Adjust the version number as needed
+    - Version must match the version of `Aspire.Hosting.Azure.Storage` in AppHost project.
+20. `AppHost.cs` – add after `var photos = …`
+    ```cs
+    builder.AddProject<Projects.PhotoGallery_Web>("webapp")
+            .WithReference(photos)
+            .WaitFor(photos);
+    ```
+21. `PG.Web.Program.cs` add after `var builder = …`
+    ```cs
+    builder.AddAzureBlobContainerClient("photos");
+    ```
+22. `PG.Web.Program.cs` update `app.MapGet` to be the following. Note it will need this using statement to work `using Azure.Storage.Blobs;`
+    ```cs
+    app.MapGet("/", async (BlobContainerClient client) =>
+    {
+        var blobs = client.GetBlobsAsync();
+        var photos = new List<string>();
+        await foreach(var photo in blobs)
+        {
+            photos.Add(photo.Name);
+        }
+        return new RazorComponentResult<PhotoList>(new {Photos = photos } );
+    });
+    ```
+    - This requires the using statement `using Azure.Storage.Blobs;`.
+23. `PG.Web.PhotoList.razor` – replace with the code below
+    ```
+    @code
+    {
+        [Parameter]
+        public IEnumerable<string> Photos { get; set; } = [];
+    }
+
+    <html>
+    <head>
+        <title>Photo List</title>
+    </head>
+    <body>
+        <script src="/_framework/aspnetcore-browser-refresh.js"></script>
+
+        <div>
+            <form action="/upload" method="post" enctype="multipart/form-data">
+                <div>
+                    <label for="photo">Choose photo:</label>
+                    <input type="file" id="photo" name="photo" accept="image/*" required > 
+                </div>
+                <div>
+                    <button type="submit">Upload Photo</button>
+                </div>
+            </form>
+        </div>
+
+        <ul>
+            @foreach (var photo in Photos)
+            {
+                <li>@photo</li>
+            }
+        </ul>
+    </body>
+    </html>
+    ```
+24. `PG.Web`: add Project Reference to ServiceDefaults project
+    - `dotnet add reference src\PhotoGallery.ServiceDefaults\PhotoGallery.ServiceDefaults.csproj`
+25. `PG.Web.Program.cs` add after `var builder = …`
+    ```cs
+    builder.AddServiceDefaults();
+    ```
+26. `PG.Web.Program.cs` add after `var app = builder.Build()`
+    ```cs
+    app.MapDefaultEndpoints();
+    ```
+27. `PG.Web.Program.cs` add after `app.MapGet …`
+    ```
+    app.MapPost("/upload", async (IFormFile photo, BlobContainerClient client) =>
+    {
+        if (photo.Length > 0)
+        {
+            var blobClient = client.GetBlobClient(photo.FileName);
+            await blobClient.UploadAsync(photo.OpenReadStream(), true);
+        }
+    
+        return Results.Redirect("/");
+    });
+    ```
+28. Verify in the dashboard that Traces has webapp showing up in the Resource dropdown.
+29. If you try webapp, you’ll get antiforgery errors. The exception should be in Structured logs in the dashboard.
+30. `PG.Web.Program.cs` – add before `var app = builder.Build();`
+    ```cs
+    builder.Services.AddAntiforgery();
+    ```
+31. `PG.Web.Program.cs` – add after `var app = builder.Build()`
+    ```cs
+    app.UseAntiforgery();
+    ```
+32. `PG.Web.PhotoList.razor` – add immediately after opening `<form>` tag.
+    ```html
+    <AntiforgeryToken />
+    ```
  - This requires the using statement `@using Microsoft.AspNetCore.Components.Forms`.
-32. The app should be working, after uploading an image, the file name should be listed on the web page.
+33. The app should be working, after uploading an image, the file name should be listed on the web page.
