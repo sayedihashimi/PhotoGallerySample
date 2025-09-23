@@ -1,0 +1,158 @@
+:root {
+    --gallery-gap: clamp(0.75rem, 1.5vw, 1.25rem);
+    --card-radius: 12px;
+    --card-bg: var(--color-surface, #1e1e1e);
+    --card-border: hsl(0 0% 100% / 0.08);
+    --card-shadow: 0 2px 4px -2px hsl(0 0% 0% / 0.4), 0 6px 16px -4px hsl(0 0% 0% / 0.35);
+    --focus-ring: 0 0 0 3px hsl(200 100% 50% / .6);
+    --upload-accent: #2563eb;
+    --upload-accent-hover: #1d4ed8;
+    --empty-fg: hsl(0 0% 100% / 0.6);
+}
+
+.photo-list-root {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gallery-gap);
+    padding: clamp(1rem, 2vw, 2rem) clamp(1rem, 3vw, 3rem) 3rem;
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+}
+
+.page-title {
+    margin: 0 0 .5rem;
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    font-weight: 600;
+    letter-spacing: -.5px;
+}
+
+.upload-header {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    align-items: flex-start;
+}
+
+.upload-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+    align-items: center;
+    background: linear-gradient(145deg, hsl(217 33% 18%), hsl(217 33% 13%));
+    padding: .75rem 1rem;
+    border-radius: var(--card-radius);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+}
+
+.file-input {
+    max-width: 260px;
+}
+
+.file-input-label {
+    font-weight: 500;
+}
+
+.upload-button {
+    background: var(--upload-accent);
+    color: #fff;
+    border: none;
+    padding: .55rem 1.1rem;
+    border-radius: 8px;
+    font-size: .95rem;
+    font-weight: 500;
+    cursor: pointer;
+    line-height: 1.1;
+    box-shadow: 0 1px 2px hsl(0 0% 0% / .4), 0 3px 6px -3px hsl(0 0% 0% / .5);
+    transition: background .15s, transform .15s;
+}
+
+.upload-button:hover {
+    background: var(--upload-accent-hover);
+}
+
+.upload-button:active {
+    transform: translateY(1px);
+}
+
+.gallery {
+    --min-col-size: 180px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--min-col-size), 1fr));
+    gap: var(--gallery-gap);
+}
+
+.photo-card {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--card-shadow);
+    transition: transform .25s, box-shadow .25s;
+}
+
+.photo-card:focus-within, .photo-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px -4px hsl(0 0% 0% / 0.55), 0 12px 32px -6px hsl(0 0% 0% / 0.45);
+}
+
+.image-wrapper {
+    aspect-ratio: 4 / 3;
+    background: linear-gradient(145deg, hsl(217 15% 22%), hsl(217 15% 15%));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.caption {
+    padding: .55rem .75rem .7rem;
+    font-size: .8rem;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: .3px;
+    color: hsl(0 0% 100% / 0.9);
+    word-break: break-all;
+    background: linear-gradient(180deg, hsl(0 0% 100% / .04), hsl(0 0% 100% / .02));
+}
+
+.empty-state {
+    border: 2px dashed var(--card-border);
+    padding: 3rem min(5vw, 3rem);
+    text-align: center;
+    border-radius: var(--card-radius);
+    font-size: 1rem;
+    color: var(--empty-fg);
+    background: linear-gradient(145deg, hsl(217 20% 16%), hsl(217 20% 12%));
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --card-bg: #ffffff;
+        --card-border: hsl(220 15% 85%);
+        --empty-fg: hsl(220 20% 40%);
+    }
+    .upload-form { background: linear-gradient(145deg, hsl(217 70% 98%), hsl(217 65% 93%)); }
+    .image-wrapper { background: linear-gradient(145deg, hsl(217 15% 90%), hsl(217 15% 82%)); }
+    .caption { color: hsl(220 30% 30%); }
+    .empty-state { background: linear-gradient(145deg, hsl(217 30% 96%), hsl(217 25% 92%)); }
+}
+
+@media (max-width: 560px) {
+    .upload-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .file-input { max-width: 100%; }
+}

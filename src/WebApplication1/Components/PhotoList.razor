@@ -1,36 +1,41 @@
 ﻿@using Microsoft.AspNetCore.Components.Forms
-@code
-{
+@code {
     [Parameter]
     public IEnumerable<string> Photos { get; set; } = [];
+
+    private static string BuildPhotoUrl(string name) => $"/photos/{Uri.EscapeDataString(name)}";
 }
 
-<html>
-<head>
-    <title>Photo List</title>
-</head>
-<body>
-    <script src="/_framework/aspnetcore-browser-refresh.js"></script>
-
-    <div>
-        <form action="/upload" method="post" enctype="multipart/form-data">
+<section class="photo-list-root">
+    <header class="upload-header">
+        <h1 class="page-title">Photo Gallery</h1>
+        <form class="upload-form" action="/upload" method="post" enctype="multipart/form-data">
             <AntiforgeryToken />
-            <div>
-                <label for="photo">Choose photo:</label>
-                <input type="file" id="photo" name="photo" accept="image/*" required>
-            </div>
-            <div>
-                <button type="submit">Upload Photo</button>
-            </div>
+            <label class="file-input-label" for="photo">Choose photo</label>
+            <input class="file-input" type="file" id="photo" name="photo" accept="image/*" required />
+            <button class="upload-button" type="submit">Upload</button>
         </form>
-    </div>
+    </header>
 
-    <ul>
-        @foreach (var photo in Photos)
-        {
-            <li>@photo</li>
-        }
-    </ul>
-</body>
-</html>
+    @if (Photos is null || !Photos.Any())
+    {
+        <div class="empty-state">
+            <p>No photos uploaded yet. Use the form above to add one.</p>
+        </div>
+    }
+    else
+    {
+        <div class="gallery" role="list" aria-label="Photo gallery">
+            @foreach (var photo in Photos)
+            {
+                <figure class="photo-card" role="listitem">
+                    <div class="image-wrapper">
+                        <img src="@BuildPhotoUrl(photo)" alt="@photo" loading="lazy" decoding="async" />
+                    </div>
+                    <figcaption class="caption" title="@photo">@photo</figcaption>
+                </figure>
+            }
+        </div>
+    }
+</section>
 
