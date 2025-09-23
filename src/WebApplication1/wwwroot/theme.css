@@ -1,0 +1,42 @@
+/* Global dark theme tokens */
+:root {
+  --gallery-gap: clamp(.75rem, 1.6vw, 1.25rem);
+  --card-radius: 14px;
+  --color-bg: hsl(222 28% 9%);
+  --color-bg-accent: linear-gradient(145deg, hsl(222 30% 14%), hsl(222 32% 10%));
+  --card-bg: hsl(222 25% 15%);
+  --card-bg-alt: hsl(222 24% 18%);
+  --card-border: hsl(220 18% 65% / 0.16);
+  --card-border-strong: hsl(220 40% 70% / 0.35);
+  --shadow-sm: 0 2px 4px -2px hsl(0 0% 0% / .55);
+  --shadow-lg: 0 10px 32px -10px hsl(222 70% 20% / .45);
+  --focus-ring: 0 0 0 3px hsl(210 90% 60% / .55), 0 0 0 6px hsl(210 90% 60% / .2);
+  --upload-accent: hsl(215 90% 55%);
+  --upload-accent-hover: hsl(215 92% 50%);
+  --upload-accent-active: hsl(215 95% 46%);
+  --text-strong: hsl(220 33% 94%);
+  --text-dim: hsl(220 18% 70%);
+  --danger: hsl(0 78% 55%);
+  --danger-hover: hsl(0 80% 60%);
+  --danger-active: hsl(0 85% 52%);
+  --danger-ring: 0 0 0 3px hsl(0 85% 55% / .4), 0 0 0 6px hsl(0 85% 55% / .18);
+  --empty-fg: hsl(220 14% 60%);
+}
+
+body {
+  background: var(--color-bg);
+  background-image: radial-gradient(circle at 25% 20%, hsl(222 40% 18% / .55), transparent 55%),
+    radial-gradient(circle at 80% 70%, hsl(222 55% 22% / .35), transparent 60%);
+  color: var(--text-strong);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+  min-height: 100dvh;
+  margin: 0;
+}
+
+/* Global layout spacing for gallery component */
+.photo-list-root { padding: clamp(2rem,4vw,3rem) clamp(2rem,5vw,4rem) 4rem; }
+.photo-list-root .content-container { width: 100%; max-width: 1200px; margin-inline: auto; }
+
+/* Ensure gallery UL default bullets never appear (defensive) */
+ul.gallery { list-style: none !important; margin: 0; padding: 0; }
+ul.gallery > li { list-style: none !important; }

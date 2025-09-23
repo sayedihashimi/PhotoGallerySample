@@ -1,36 +1,74 @@
 ﻿@using Microsoft.AspNetCore.Components.Forms
-@code
-{
+@code {
     [Parameter]
     public IEnumerable<string> Photos { get; set; } = [];
+
+    private static string BuildPhotoUrl(string name) => $"/photos/{Uri.EscapeDataString(name)}";
 }
 
-<html>
-<head>
-    <title>Photo List</title>
-</head>
-<body>
-    <script src="/_framework/aspnetcore-browser-refresh.js"></script>
+<link rel="stylesheet" href="/theme.css" />
+<section class="photo-list-root">
+    <div class="content-container">
+        <header class="upload-header">
+            <h1 class="page-title">Photo Gallery</h1>
+            <div class="upload-panel" aria-labelledby="upload-title">
+                <h2 id="upload-title" class="upload-title">Upload a Photo</h2>
+                <form class="upload-form" action="/upload" method="post" enctype="multipart/form-data" id="uploadForm">
+                    <AntiforgeryToken />
+                    <div class="field-group">
+                        <label class="file-input-label" for="photo">Choose photo</label>
+                        <input class="file-input" type="file" id="photo" name="photo" accept="image/*" required />
+                    </div>
+                    <button class="upload-button" type="submit" disabled id="uploadButton">Upload</button>
+                </form>
+            </div>
+        </header>
 
-    <div>
-        <form action="/upload" method="post" enctype="multipart/form-data">
-            <AntiforgeryToken />
-            <div>
-                <label for="photo">Choose photo:</label>
-                <input type="file" id="photo" name="photo" accept="image/*" required>
+        <div class="section-separator" role="separator" aria-hidden="true"></div>
+
+        <section class="gallery-section" aria-labelledby="gallery-heading">
+            <div class="section-heading-row">
+                <h2 id="gallery-heading" class="section-heading">Your Photos</h2>
+                <span class="photo-count" aria-live="polite">@((Photos?.Count() ?? 0)) total</span>
             </div>
-            <div>
-                <button type="submit">Upload Photo</button>
-            </div>
-        </form>
+
+            @if (Photos is null || !Photos.Any())
+            {
+                <div class="empty-state">
+                    <p>No photos uploaded yet. Use the panel above to add one.</p>
+                </div>
+            }
+            else
+            {
+                <ul class="gallery" aria-label="Photo gallery">
+                    @foreach (var photo in Photos)
+                    {
+                        <li class="photo-card">
+                            <div class="image-wrapper">
+                                <img src="@BuildPhotoUrl(photo)" alt="@photo" loading="lazy" decoding="async" />
+                                <form method="post" action="/photos/@Uri.EscapeDataString(photo)/delete" class="delete-form" onsubmit="return confirm('Delete this photo?');">
+                                    <AntiforgeryToken />
+                                    <button type="submit" class="delete-button" aria-label="Delete @photo" title="Delete @photo">✕</button>
+                                </form>
+                            </div>
+                            <div class="caption" title="@photo">@photo</div>
+                        </li>
+                    }
+                </ul>
+            }
+        </section>
     </div>
+</section>
 
-    <ul>
-        @foreach (var photo in Photos)
-        {
-            <li>@photo</li>
+<script>
+    (function(){
+        const fileInput = document.getElementById('photo');
+        const uploadBtn = document.getElementById('uploadButton');
+        if(fileInput && uploadBtn){
+            fileInput.addEventListener('change', () => {
+                uploadBtn.disabled = !fileInput.files || fileInput.files.length === 0;
+            });
         }
-    </ul>
-</body>
-</html>
+    })();
+</script>
 
