@@ -43,6 +43,20 @@ app.MapGet("/photos/{name}", async Task<Results<NotFound, FileStreamHttpResult>>
     return TypedResults.File(stream, contentType);
 });
 
+app.MapPost("/photos/{name}/delete", async Task<IResult> (string name, BlobContainerClient client, CancellationToken ct) =>
+{
+    var blob = client.GetBlobClient(name);
+    try
+    {
+        await blob.DeleteIfExistsAsync(cancellationToken: ct);
+    }
+    catch
+    {
+        // Swallow errors for now (network/transient). Could log.
+    }
+    return Results.Redirect("/");
+});
+
 app.MapPost("/upload", async (IFormFile photo, BlobContainerClient client) =>
 {
     if (photo.Length > 0)

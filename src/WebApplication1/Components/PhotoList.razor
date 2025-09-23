@@ -25,17 +25,21 @@
     }
     else
     {
-        <div class="gallery" role="list" aria-label="Photo gallery">
+        <ul class="gallery" aria-label="Photo gallery">
             @foreach (var photo in Photos)
             {
-                <figure class="photo-card" role="listitem">
+                <li class="photo-card">
                     <div class="image-wrapper">
                         <img src="@BuildPhotoUrl(photo)" alt="@photo" loading="lazy" decoding="async" />
+                        <form method="post" action="/photos/@Uri.EscapeDataString(photo)/delete" class="delete-form" onsubmit="return confirm('Delete this photo?');">
+                            <AntiforgeryToken />
+                            <button type="submit" class="delete-button" aria-label="Delete @photo" title="Delete @photo">Delete ✕</button>
+                        </form>
                     </div>
-                    <figcaption class="caption" title="@photo">@photo</figcaption>
-                </figure>
+                    <div class="caption" title="@photo">@photo</div>
+                </li>
             }
-        </div>
+        </ul>
     }
 </section>
 
