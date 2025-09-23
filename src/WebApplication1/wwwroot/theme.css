@@ -32,3 +32,11 @@ body {
   min-height: 100dvh;
   margin: 0;
 }
+
+/* Global layout spacing for gallery component */
+.photo-list-root { padding: clamp(2rem,4vw,3rem) clamp(2rem,5vw,4rem) 4rem; }
+.photo-list-root .content-container { width: 100%; max-width: 1200px; margin-inline: auto; }
+
+/* Ensure gallery UL default bullets never appear (defensive) */
+ul.gallery { list-style: none !important; margin: 0; padding: 0; }
+ul.gallery > li { list-style: none !important; }

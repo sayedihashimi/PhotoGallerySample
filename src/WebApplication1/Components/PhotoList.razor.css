@@ -2,7 +2,30 @@
    Dark Theme (component scoped)
    --------------------------- */
 
-.photo-list-root { display: flex; flex-direction: column; gap: var(--gallery-gap); padding: clamp(1rem, 2vw, 2rem) clamp(1rem, 3vw, 3rem) 3rem; box-sizing: border-box; }
+.photo-list-root { display: flex; flex-direction: column; gap: 2.25rem; box-sizing: border-box; }
+
+/* Constrain inner content for comfortable line length */
+.content-container { display: flex; flex-direction: column; gap: 2.25rem; }
+
+/* Upload panel distinct surface */
+.upload-panel { margin-top: .5rem; background: var(--color-bg-accent); padding: 1.25rem 1.35rem 1.35rem; border: 1px solid var(--card-border); border-radius: calc(var(--card-radius) + 2px); box-shadow: var(--shadow-sm), var(--shadow-lg); display: flex; flex-direction: column; gap: 1rem; }
+.upload-title { margin: 0; font-size: 1.15rem; font-weight: 600; letter-spacing: .5px; color: var(--text-strong); }
+.field-group { display: flex; flex-direction: column; gap: .4rem; min-width: 240px; }
+
+/* Section separator */
+.section-separator { height: 1px; width: 100%; background: linear-gradient(90deg, transparent, hsl(220 40% 70% / .25), transparent); opacity: .9; }
+
+/* Gallery section heading row */
+.gallery-section { display: flex; flex-direction: column; gap: 1.25rem; }
+.section-heading-row { display: flex; flex-wrap: wrap; gap: .75rem 1.25rem; align-items: baseline; justify-content: space-between; }
+.section-heading { margin: 0; font-size: 1.25rem; font-weight: 600; letter-spacing: .5px; color: var(--text-strong); }
+.photo-count { font-size: .8rem; font-weight: 500; padding: .35rem .6rem; border-radius: 999px; background: hsl(222 30% 20% / .55); border: 1px solid hsl(220 40% 70% / .25); color: var(--text-dim); }
+
+/* Disabled state for upload button */
+.upload-button[disabled] { cursor: not-allowed; opacity: .5; filter: grayscale(.2); box-shadow: none; transform: none !important; }
+.upload-button[disabled]:hover { background: var(--upload-accent); }
+
+@media (max-width: 780px) { .section-heading-row { flex-direction: column; align-items: flex-start; } }
 
 .page-title {
     margin: 0 0 .5rem;
