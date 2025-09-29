@@ -1,0 +1,1 @@
+For instructions on how to reproduce this sample, follow the steps in the [READMD.md](https://github.com/sayedihashimi/PhotoGallerySample/blob/start-here/README.md) in the start-here branch.
