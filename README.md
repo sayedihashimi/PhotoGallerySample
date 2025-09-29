@@ -15,6 +15,10 @@ There is also a [PhotoList.razor.txt](assets/PhotoList.razor.txt) in the assets 
 PhotoList.razor file that has code to get started and some commented out code that you can paste in later.
 
 ## Demo Steps
+To reproduce the PhotoGallery using the dotnet CLI, all steps are below. When running a command, run it from the new directory that you create in step 1.
+
+To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start with step 5 in VS.
+
 1. Create, or open, an empty folder.
 2. Create a `Directory.Build.props` with the content below.
     ```xml
@@ -36,7 +40,7 @@ PhotoList.razor file that has code to get started and some commented out code th
    - Name: `PhotoGallery`
    - Path: `.\`
    - Template version: `daily`
-5. Use the command below to create the Razor Pages web app. In VS select `ASP.NET Core Empty (9.0)` as the project template.
+5. Use the command below to create the Razor Pages web app. In VS select `ASP.NET Core Empty (9.0)` as the project template. When using in VS make sure to check "Enlist in Aspire Orchestration".
     ```bash
     dotnet new web -o PhotoGallery.Web -f net9.0
     ```
@@ -192,7 +196,7 @@ PhotoList.razor file that has code to get started and some commented out code th
     ```
 26. `PG.Web`: add Project Reference to ServiceDefaults project
     ```bash
-    dotnet add reference src\PhotoGallery.ServiceDefaults\PhotoGallery.ServiceDefaults.csproj
+    dotnet add reference --project .\PhotoGallery.Web\PhotoGallery.Web.csproj .\PhotoGallery.ServiceDefaults\PhotoGallery.ServiceDefaults.csproj
     ```
 27. `PG.Web.Program.cs` add after `var builder = …`
     ```cs
