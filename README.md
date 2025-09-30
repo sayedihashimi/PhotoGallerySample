@@ -172,7 +172,7 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     </head>
     <body>
         <script src="/_framework/aspnetcore-browser-refresh.js"></script>
-
+        <h2>Photo List</h2>
         <div>
             <form action="/upload" method="post" enctype="multipart/form-data">
                 <div>
@@ -194,15 +194,15 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     </body>
     </html>
     ```
-26. `PG.Web`: add Project Reference to ServiceDefaults project
+26. `PG.Web`: add Project Reference to ServiceDefaults project. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
     ```bash
     dotnet add reference --project .\PhotoGallery.Web\PhotoGallery.Web.csproj .\PhotoGallery.ServiceDefaults\PhotoGallery.ServiceDefaults.csproj
     ```
-27. `PG.Web.Program.cs` add after `var builder = …`
+27. `PG.Web.Program.cs` add after `var builder = …`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
     ```cs
     builder.AddServiceDefaults();
     ```
-28. `PG.Web.Program.cs` add after `var app = builder.Build()`
+28. `PG.Web.Program.cs` add after `var app = builder.Build()`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
     ```cs
     app.MapDefaultEndpoints();
     ```
