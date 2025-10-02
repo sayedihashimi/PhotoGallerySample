@@ -40,40 +40,41 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
    - Name: `PhotoGallery`
    - Path: `.\`
    - Template version: `daily`
-5. Use the command below to create the Razor Pages web app. In VS select `ASP.NET Core Empty (9.0)` as the project template. When using in VS make sure to check "Enlist in Aspire Orchestration".
+5. If you are using VS, open the solution file that was created by `aspire run`
+6. Use the command below to create the Razor Pages web app. In VS select `ASP.NET Core Empty (9.0)` as the project template. When using in VS make sure to check "Enlist in Aspire Orchestration".
     ```bash
     dotnet new web -o PhotoGallery.Web -f net9.0
     ```
-6. Run `dotnet watch --verbose --non-interactive` or `F5`/`CTRL-F5` in Visual Studio.
-7. Dashboard should show "No Resources Found"
-8. AppHost: `Add Project Reference` to `PhotoGallery.Web`
+7. Run `dotnet watch --verbose --non-interactive` or `F5`/`CTRL-F5` in Visual Studio.
+8. Dashboard should show "No Resources Found"
+9. AppHost: `Add Project Reference` to `PhotoGallery.Web`
     ```bash
     dotnet add reference --project .\PhotoGallery.AppHost\PhotoGallery.AppHost.csproj .\PhotoGallery.Web\PhotoGallery.Web.csproj
     ```
-9.  `AppHost.cs` add after `var builder = …`
+10. `AppHost.cs` add after `var builder = …`
     ```cs
     builder.AddProject<Projects.PhotoGallery_Web>("webapp");
     ```
-10. Dashboard should show "webapp" and it should get to running state.
-11. AppHost: Add NuGet pkg reference to `Aspire.Hosting.Azure.Storage`
+11. Dashboard should show "webapp" and it should get to running state.
+12. AppHost: Add NuGet pkg reference to `Aspire.Hosting.Azure.Storage`
     ```bash
      dotnet add package --project .\PhotoGallery.AppHost\PhotoGallery.AppHost.csproj Aspire.Hosting.Azure.Storage --prerelease
     ```
     - Adjust the version number as needed
     - Note: version must match the version of `Aspire.Hosting.AppHost`
-12. AppHost.cs – add code directly below `var builder = …`
+13. AppHost.cs – add code directly below `var builder = …`
     ```cs
     var photos = builder.AddAzureStorage("storage")
                         .RunAsEmulator()
                         .AddBlobs("blobs")
                         .AddBlobContainer("photos");
     ```
-13. `PG.Web.Program.cs` – add after the first line (`var builder = …`)
+14. `PG.Web.Program.cs` – add after the first line (`var builder = …`)
     ```cs
     builder.Services.AddRazorComponents();
     ```
-14. PG.Web: Add `Components` folder
-15. PG.Web: Add new file `Components\PhotoList.razor` with the contents below.
+15. PG.Web: Add `Components` folder
+16. PG.Web: Add new file `Components\PhotoList.razor` with the contents below.
     ```
     @code
     {
@@ -88,7 +89,7 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
         }
     </ul>
     ```
-16. `PG.Web.Program.cs` update app.MapGet to be the following
+17. `PG.Web.Program.cs` update app.MapGet to be the following
     ```
     app.MapGet("/", () => 
     {
@@ -100,7 +101,7 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     using PhotoGallery.Web.Components;
     using Microsoft.AspNetCore.Http.HttpResults;
     ```    
-17. `PhotoList.razor` update with the following
+18. `PhotoList.razor` update with the following
     ```
     @code
     {
@@ -123,29 +124,29 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
         </body>
     </html>
     ```
-18. The title of the web page should be "Photo List"
-19. View dashboard there shouldn’t be any errors
-20. `PG.Web` Add NuGet Pkg ref to `Aspire.Azure.Storage.Blobs`
+19. The title of the web page should be "Photo List"
+20. View dashboard there shouldn’t be any errors
+21. `PG.Web` Add NuGet Pkg ref to `Aspire.Azure.Storage.Blobs`
     ```bash
     dotnet add package --project .\PhotoGallery.Web\PhotoGallery.Web.csproj Aspire.Azure.Storage.Blobs --prerelease
     ```
     - Adjust the version number as needed
     - Version must match the version of `Aspire.Hosting.Azure.Storage` in AppHost project.
-21. `AppHost.cs` – replace `builder.AddProject<Projects.PhotoGallery_Web>("webapp");` with
+22. `AppHost.cs` – replace `builder.AddProject<Projects.PhotoGallery_Web>("webapp");` with
     ```cs
     builder.AddProject<Projects.PhotoGallery_Web>("webapp")
             .WithReference(photos)
             .WaitFor(photos);
     ```
-22. `PG.Web.Program.cs` add after `var builder = …`
+23. `PG.Web.Program.cs` add after `var builder = …`
     ```cs
     builder.AddAzureBlobContainerClient("photos");
     ```
-23. `PG.Web.Program.cs` update add using statement. _Skip if using VS. VS Shoud insert this on paste automatically._
+24. `PG.Web.Program.cs` update add using statement. _Skip if using VS. VS Shoud insert this on paste automatically._
     ```cs
     using Azure.Storage.Blobs;
     ```
-24. `PG.Web.Program.cs` update `app.MapGet` to be the following.
+25. `PG.Web.Program.cs` update `app.MapGet` to be the following.
     ```cs
     app.MapGet("/", async (BlobContainerClient client) =>
     {
@@ -158,7 +159,7 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
         return new RazorComponentResult<PhotoList>(new {Photos = photos } );
     });
     ```
-25. `PG.Web.PhotoList.razor` – replace with the code below
+26. `PG.Web.PhotoList.razor` – replace with the code below
     ```
     @code
     {
@@ -194,19 +195,19 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     </body>
     </html>
     ```
-26. `PG.Web`: add Project Reference to ServiceDefaults project. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
+27. `PG.Web`: add Project Reference to ServiceDefaults project. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
     ```bash
     dotnet add reference --project .\PhotoGallery.Web\PhotoGallery.Web.csproj .\PhotoGallery.ServiceDefaults\PhotoGallery.ServiceDefaults.csproj
     ```
-27. `PG.Web.Program.cs` add after `var builder = …`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
+28. `PG.Web.Program.cs` add after `var builder = …`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
     ```cs
     builder.AddServiceDefaults();
     ```
-28. `PG.Web.Program.cs` add after `var app = builder.Build()`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
+29. `PG.Web.Program.cs` add after `var app = builder.Build()`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
     ```cs
     app.MapDefaultEndpoints();
     ```
-29. `PG.Web.Program.cs` add after `app.MapGet …`
+30. `PG.Web.Program.cs` add after `app.MapGet …`
     ```cs
     app.MapPost("/upload", async (IFormFile photo, BlobContainerClient client) =>
     {
@@ -219,22 +220,124 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
         return Results.Redirect("/");
     });
     ```
-30. Verify in the dashboard that Traces has webapp showing up in the Resource dropdown.
-31. If you try webapp, you’ll get antiforgery errors. The exception should be in Structured logs in the dashboard.
-32. `PG.Web.Program.cs` – add before `var app = builder.Build();`
+31. Verify in the dashboard that Traces has webapp showing up in the Resource dropdown.
+32. If you try webapp, you’ll get antiforgery errors. The exception should be in Structured logs in the dashboard.
+33. `PG.Web.Program.cs` – add before `var app = builder.Build();`
     ```cs
     builder.Services.AddAntiforgery();
     ```
-33. `PG.Web.Program.cs` – add after `var app = builder.Build()`
+34. `PG.Web.Program.cs` – add after `var app = builder.Build()`
     ```cs
     app.UseAntiforgery();
     ```
-34. `PG.Web.PhotoList.razor` – add using at the top of the file. _Skip if using VS. VS Shoud insert this on paste automatically._
+35. `PG.Web.PhotoList.razor` – add using at the top of the file. _Skip if using VS. VS Shoud insert this on paste automatically._
     ```
     @using Microsoft.AspNetCore.Components.Forms
     ```
-35. `PG.Web.PhotoList.razor` – add immediately after opening `<form>` tag.
+36. `PG.Web.PhotoList.razor` – add immediately after opening `<form>` tag.
     ```html
     <AntiforgeryToken />
     ```
-36. The app should be working, after uploading an image, the file name should be listed on the web page.
+37. The app should be working, after uploading an image, the file name should be listed on the web page.
+38. `PG.Web` - add a `wwwroot` folder
+39. `PG.Web` - add a new file at `wwwroot/theme.css`, with the content below
+    ```css
+    body {
+        background-color: gray;
+    }
+    ```
+40. `PG.Web.Program.cs` - add after `var app = builder.Build()`
+    ```cs
+    app.UseStaticFiles();
+    ```
+41. `PG.Web.PhotoList.razor` - add in `<head>`
+    ```html
+    <link rel="stylesheet" href="/theme.css"/>
+    ```
+42. `PG.Web.PhotoList.razor` - replace with the code below
+    ```
+    @using Microsoft.AspNetCore.Components.Forms
+    @code {
+        [Parameter]
+        public IEnumerable<string> Photos { get; set; } = [];
+
+        private static string BuildPhotoUrl(string name) => $"/photos/{Uri.EscapeDataString(name)}";
+    }
+
+    <html>
+    <head>
+        <title>Photo List</title>
+        <link rel="stylesheet" href="/theme.css" />
+    </head>
+    <body>
+        <section class="photo-list-root">
+            <div class="content-container">
+                <header class="upload-header">
+                    <h1 class="page-title">Photo Gallery</h1>
+                    <div class="upload-panel" aria-labelledby="upload-title">
+                        <h2 id="upload-title" class="upload-title">Upload a Photo</h2>
+                        <form class="upload-form" action="/upload" method="post" enctype="multipart/form-data" id="uploadForm">
+                            <AntiforgeryToken />
+                            <div class="field-group">
+                                <label class="file-input-label" for="photo">Choose photo</label>
+                                <input class="file-input" type="file" id="photo" name="photo" accept="image/*" required />
+                            </div>
+                            <button class="upload-button" type="submit" disabled id="uploadButton">Upload</button>
+                        </form>
+                    </div>
+                </header>
+
+                <div class="section-separator" role="separator" aria-hidden="true"></div>
+
+                <section class="gallery-section" aria-labelledby="gallery-heading">
+                    <div class="section-heading-row">
+                        <h2 id="gallery-heading" class="section-heading">Your Photos</h2>
+                        <span class="photo-count" aria-live="polite">@((Photos?.Count() ?? 0)) total</span>
+                    </div>
+
+                    @if (Photos is null || !Photos.Any())
+                    {
+                        <div class="empty-state">
+                            <p>No photos uploaded yet. Use the panel above to add one.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <ul class="gallery" aria-label="Photo gallery">
+                            @foreach (var photo in Photos)
+                            {
+                                <li class="photo-card">
+                                    <div class="image-wrapper">
+                                        <img src="@BuildPhotoUrl(photo)" alt="@photo" loading="lazy" decoding="async" />
+                                        <form method="post" action="/photos/@Uri.EscapeDataString(photo)/delete" class="delete-form" onsubmit="return confirm('Delete this photo?');">
+                                            <AntiforgeryToken />
+                                            <button type="submit" class="delete-button" aria-label="Delete @photo" title="Delete @photo">✕</button>
+                                        </form>
+                                    </div>
+                                    <div class="caption" title="@photo">@photo</div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </section>
+            </div>
+        </section>
+
+        <script>
+            (function() {
+                const fileInput = document.getElementById('photo');
+                const uploadBtn = document.getElementById('uploadButton');
+                if (fileInput && uploadBtn) {
+                    fileInput.addEventListener('change', () => {
+                        uploadBtn.disabled = !fileInput.files || fileInput.files.length === 0;
+                    });
+                }
+            })();
+        </script>
+    </body>
+    </html>
+    ```
+43. `PG.Web.wwwroot.theme.css` - replace with the content below
+    ```css
+    ```
+44. The app should be working now.
