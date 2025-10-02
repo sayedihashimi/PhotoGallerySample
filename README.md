@@ -45,36 +45,40 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     ```bash
     dotnet new web -o PhotoGallery.Web -f net9.0
     ```
-7. Run `dotnet watch --verbose --non-interactive` or `F5`/`CTRL-F5` in Visual Studio.
-8. Dashboard should show "No Resources Found"
-9. AppHost: `Add Project Reference` to `PhotoGallery.Web`
+7. If using the CLI add the project to the solution with the command below. Skip this step if using VS.
+   ```
+   dotnet sln .\PhotoGallery.sln add .\PhotoGallery.Web\PhotoGallery.Web.csproj
+   ```
+8. Run `dotnet watch --verbose --non-interactive` or `F5`/`CTRL-F5` in Visual Studio.
+9.  Dashboard should show "No Resources Found"
+10. AppHost: `Add Project Reference` to `PhotoGallery.Web`
     ```bash
     dotnet add reference --project .\PhotoGallery.AppHost\PhotoGallery.AppHost.csproj .\PhotoGallery.Web\PhotoGallery.Web.csproj
     ```
-10. `AppHost.cs` add after `var builder = …`
+11. `AppHost.cs` add after `var builder = …`
     ```cs
     builder.AddProject<Projects.PhotoGallery_Web>("webapp");
     ```
-11. Dashboard should show "webapp" and it should get to running state.
-12. AppHost: Add NuGet pkg reference to `Aspire.Hosting.Azure.Storage`
+12. Dashboard should show "webapp" and it should get to running state.
+13. AppHost: Add NuGet pkg reference to `Aspire.Hosting.Azure.Storage`
     ```bash
      dotnet add package --project .\PhotoGallery.AppHost\PhotoGallery.AppHost.csproj Aspire.Hosting.Azure.Storage --prerelease
     ```
     - Adjust the version number as needed
     - Note: version must match the version of `Aspire.Hosting.AppHost`
-13. AppHost.cs – add code directly below `var builder = …`
+14. AppHost.cs – add code directly below `var builder = …`
     ```cs
     var photos = builder.AddAzureStorage("storage")
                         .RunAsEmulator()
                         .AddBlobs("blobs")
                         .AddBlobContainer("photos");
     ```
-14. `PG.Web.Program.cs` – add after the first line (`var builder = …`)
+15. `PG.Web.Program.cs` – add after the first line (`var builder = …`)
     ```cs
     builder.Services.AddRazorComponents();
     ```
-15. PG.Web: Add `Components` folder
-16. PG.Web: Add new file `Components\PhotoList.razor` with the contents below.
+16. PG.Web: Add `Components` folder
+17. PG.Web: Add new file `Components\PhotoList.razor` with the contents below.
     ```
     @code
     {
@@ -89,7 +93,7 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
         }
     </ul>
     ```
-17. `PG.Web.Program.cs` update app.MapGet to be the following
+18. `PG.Web.Program.cs` update app.MapGet to be the following
     ```
     app.MapGet("/", () => 
     {
@@ -101,7 +105,7 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     using PhotoGallery.Web.Components;
     using Microsoft.AspNetCore.Http.HttpResults;
     ```    
-18. `PhotoList.razor` update with the following
+19. `PhotoList.razor` update with the following
     ```
     @code
     {
@@ -124,29 +128,29 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
         </body>
     </html>
     ```
-19. The title of the web page should be "Photo List"
-20. View dashboard there shouldn’t be any errors
-21. `PG.Web` Add NuGet Pkg ref to `Aspire.Azure.Storage.Blobs`
+20. The title of the web page should be "Photo List"
+21. View dashboard there shouldn’t be any errors
+22. `PG.Web` Add NuGet Pkg ref to `Aspire.Azure.Storage.Blobs`
     ```bash
     dotnet add package --project .\PhotoGallery.Web\PhotoGallery.Web.csproj Aspire.Azure.Storage.Blobs --prerelease
     ```
     - Adjust the version number as needed
     - Version must match the version of `Aspire.Hosting.Azure.Storage` in AppHost project.
-22. `AppHost.cs` – replace `builder.AddProject<Projects.PhotoGallery_Web>("webapp");` with
+23. `AppHost.cs` – replace `builder.AddProject<Projects.PhotoGallery_Web>("webapp");` with
     ```cs
     builder.AddProject<Projects.PhotoGallery_Web>("webapp")
             .WithReference(photos)
             .WaitFor(photos);
     ```
-23. `PG.Web.Program.cs` add after `var builder = …`
+24. `PG.Web.Program.cs` add after `var builder = …`
     ```cs
     builder.AddAzureBlobContainerClient("photos");
     ```
-24. `PG.Web.Program.cs` update add using statement. _Skip if using VS. VS Shoud insert this on paste automatically._
+25. `PG.Web.Program.cs` update add using statement. _Skip if using VS. VS Shoud insert this on paste automatically._
     ```cs
     using Azure.Storage.Blobs;
     ```
-25. `PG.Web.Program.cs` update `app.MapGet` to be the following.
+26. `PG.Web.Program.cs` update `app.MapGet` to be the following.
     ```cs
     app.MapGet("/", async (BlobContainerClient client) =>
     {
@@ -159,7 +163,7 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
         return new RazorComponentResult<PhotoList>(new {Photos = photos } );
     });
     ```
-26. `PG.Web.PhotoList.razor` – replace with the code below
+27. `PG.Web.PhotoList.razor` – replace with the code below
     ```
     @code
     {
@@ -195,19 +199,19 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     </body>
     </html>
     ```
-27. `PG.Web`: add Project Reference to ServiceDefaults project. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
+28. `PG.Web`: add Project Reference to ServiceDefaults project. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
     ```bash
     dotnet add reference --project .\PhotoGallery.Web\PhotoGallery.Web.csproj .\PhotoGallery.ServiceDefaults\PhotoGallery.ServiceDefaults.csproj
     ```
-28. `PG.Web.Program.cs` add after `var builder = …`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
+29. `PG.Web.Program.cs` add after `var builder = …`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
     ```cs
     builder.AddServiceDefaults();
     ```
-29. `PG.Web.Program.cs` add after `var app = builder.Build()`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
+30. `PG.Web.Program.cs` add after `var app = builder.Build()`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
     ```cs
     app.MapDefaultEndpoints();
     ```
-30. `PG.Web.Program.cs` add after `app.MapGet …`
+31. `PG.Web.Program.cs` add after `app.MapGet …`
     ```cs
     app.MapPost("/upload", async (IFormFile photo, BlobContainerClient client) =>
     {
@@ -220,41 +224,41 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
         return Results.Redirect("/");
     });
     ```
-31. Verify in the dashboard that Traces has webapp showing up in the Resource dropdown.
-32. If you try webapp, you’ll get antiforgery errors. The exception should be in Structured logs in the dashboard.
-33. `PG.Web.Program.cs` – add before `var app = builder.Build();`
+32. Verify in the dashboard that Traces has webapp showing up in the Resource dropdown.
+33. If you try webapp, you’ll get antiforgery errors. The exception should be in Structured logs in the dashboard.
+34. `PG.Web.Program.cs` – add before `var app = builder.Build();`
     ```cs
     builder.Services.AddAntiforgery();
     ```
-34. `PG.Web.Program.cs` – add after `var app = builder.Build()`
+35. `PG.Web.Program.cs` – add after `var app = builder.Build()`
     ```cs
     app.UseAntiforgery();
     ```
-35. `PG.Web.PhotoList.razor` – add using at the top of the file. _Skip if using VS. VS Shoud insert this on paste automatically._
+36. `PG.Web.PhotoList.razor` – add using at the top of the file. _Skip if using VS. VS Shoud insert this on paste automatically._
     ```
     @using Microsoft.AspNetCore.Components.Forms
     ```
-36. `PG.Web.PhotoList.razor` – add immediately after opening `<form>` tag.
+37. `PG.Web.PhotoList.razor` – add immediately after opening `<form>` tag.
     ```html
     <AntiforgeryToken />
     ```
-37. The app should be working, after uploading an image, the file name should be listed on the web page.
-38. `PG.Web` - add a `wwwroot` folder
-39. `PG.Web` - add a new file at `wwwroot/theme.css`, with the content below
+38. The app should be working, after uploading an image, the file name should be listed on the web page.
+39. `PG.Web` - add a `wwwroot` folder
+40. `PG.Web` - add a new file at `wwwroot/theme.css`, with the content below
     ```css
     body {
         background-color: gray;
     }
     ```
-40. `PG.Web.Program.cs` - add after `var app = builder.Build()`
+41. `PG.Web.Program.cs` - add after `var app = builder.Build()`
     ```cs
     app.UseStaticFiles();
     ```
-41. `PG.Web.PhotoList.razor` - add in `<head>`
+42. `PG.Web.PhotoList.razor` - add in `<head>`
     ```html
     <link rel="stylesheet" href="/theme.css"/>
     ```
-42. `PG.Web.PhotoList.razor` - replace with the code below
+43. `PG.Web.PhotoList.razor` - replace with the code below
     ```
     @using Microsoft.AspNetCore.Components.Forms
     @code {
@@ -337,7 +341,7 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     </body>
     </html>
     ```
-43. `PG.Web.wwwroot.theme.css` - replace with the content below
+44. `PG.Web.wwwroot.theme.css` - replace with the content below
     ```css
     ```
-44. The app should be working now.
+45. The app should be working now.
