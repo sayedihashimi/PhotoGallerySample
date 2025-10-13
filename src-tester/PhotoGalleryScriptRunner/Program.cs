@@ -127,7 +127,7 @@ internal static class Program
         {
             EnsureWorking(ctx);
             AnsiConsole.MarkupLine("Launching interactive 'aspire new' (choose template: AppHost and service defaults; Name: PhotoGallery; Path: .\\ ; Template version: daily). Complete prompts then return here.");
-            await RunInteractiveProcess("pwsh", "-NoProfile -Command \"aspire new -n PhotoGallery \"", ctx.WorkingDirectory!);
+            await RunInteractiveProcess("pwsh", "-NoProfile -Command \"aspire new\"", ctx.WorkingDirectory!);
             AnsiConsole.MarkupLine("If generation succeeded you should now have a solution (e.g. PhotoGallery.sln).");
         }));
 
