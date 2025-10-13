@@ -127,7 +127,7 @@ internal static class Program
         {
             EnsureWorking(ctx);
             AnsiConsole.MarkupLine("Launching interactive 'aspire new' (choose template: AppHost and service defaults; Name: PhotoGallery; Path: .\\ ; Template version: daily). Complete prompts then return here.");
-            await RunInteractiveProcess("pwsh", "-NoProfile -Command \"aspire new\"", ctx.WorkingDirectory!);
+            await RunInteractiveProcess("pwsh", "-NoProfile -Command \"aspire new -n PhotoGallery \"", ctx.WorkingDirectory!);
             AnsiConsole.MarkupLine("If generation succeeded you should now have a solution (e.g. PhotoGallery.sln).");
         }));
 
@@ -508,15 +508,20 @@ internal static class Program
             await Task.CompletedTask;
         }));
 
-        steps.Add(new Step(n++, "Add <AntiforgeryToken /> to form (Step 37)", async ctx =>
+        steps.Add(new Step(n++, "Add <AntiforgeryToken /> after form line (Step 37)", async ctx =>
         {
             var file = ResolveWebComponent(ctx, "PhotoList.razor");
             if (file is null) return;
-            var txt = File.ReadAllText(file);
-            if (txt.Contains("<form") && !txt.Contains("AntiforgeryToken", StringComparison.Ordinal))
+            var lines = File.ReadAllLines(file).ToList();
+            if (lines.Any(l => l.Contains("AntiforgeryToken", StringComparison.Ordinal))) { await Task.CompletedTask; return; }
+            int formIndex = lines.FindIndex(l => l.Contains("<form", StringComparison.Ordinal));
+            if (formIndex >= 0)
             {
-                txt = txt.Replace("<form", "<form\n        <AntiforgeryToken />"); // simple heuristic
-                File.WriteAllText(file, txt);
+                // Determine indentation from next line or form line
+                string indent = new string(lines[formIndex].TakeWhile(char.IsWhiteSpace).ToArray()) + "    ";
+                lines.Insert(formIndex + 1, indent + "<AntiforgeryToken />");
+                File.WriteAllLines(file, lines);
+                AnsiConsole.MarkupLine("[grey]Inserted AntiforgeryToken after form line.[/]");
             }
             await Task.CompletedTask;
         }));
