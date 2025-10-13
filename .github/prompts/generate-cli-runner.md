@@ -273,7 +273,7 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     ```
     @using Microsoft.AspNetCore.Components.Forms
     ```
-37. `PG.Web.PhotoList.razor` – add immediately after opening `<form>` tag.
+37. `PG.Web.PhotoList.razor` – Add on a new line after the line contining the `<form>` tag.
     ```html
     <AntiforgeryToken />
     ```

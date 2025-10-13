@@ -458,14 +458,22 @@ internal static class Program
             return content;
         })));
 
-        steps.Add(new Step(n++, "Add upload endpoint MapPost /upload (Step 31)", ctx => ModifyWebProgram(ctx, content =>
+        steps.Add(new Step(n++, "Add upload endpoint MapPost /upload before app.Run() (Step 31)", ctx => ModifyWebProgram(ctx, content =>
         {
             if (!content.Contains("/upload", StringComparison.Ordinal))
             {
                 var upload = "app.MapPost(\"/upload\", async (IFormFile photo, BlobContainerClient client) =>\n{\n    if (photo.Length > 0)\n    {\n        var blobClient = client.GetBlobClient(photo.FileName);\n        await blobClient.UploadAsync(photo.OpenReadStream(), true);\n    }\n    return Results.Redirect(\"/\");\n});";
                 content = EnsureUsing(content, "using Azure.Storage.Blobs;");
                 content = EnsureUsing(content, "using Microsoft.AspNetCore.Http;" );
-                content = InsertAfterLineContaining(content, "app.MapGet", upload, allowMultiple: true);
+                if (content.Contains("app.Run()", StringComparison.Ordinal))
+                {
+                    content = InsertBeforeLineContaining(content, "app.Run()", upload);
+                }
+                else
+                {
+                    // Fallback to after MapGet if app.Run() not yet present
+                    content = InsertBeforeLineContaining(content, "app.MapGet", upload);
+                }
             }
             return content;
         })));
