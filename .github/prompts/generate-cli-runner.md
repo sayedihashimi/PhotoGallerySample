@@ -16,13 +16,16 @@ interactive. For each step below you'll:
    3. Quit
 
 If the user selects `Execute step` you'll perform that step. If there are any manual steps, make it clear that the user needs to take
-a specfic action.
+a specfic action. When the step is executed, you'll proceed to the next step.
+The steps are designed to be run from start to finish.
+You don't need to create any interface to let users pick certain steps to execute.
 
 When the app first starts, show the info in Prereqs and wait for the user to perform those steps.
 
 The goal is to automate as much of this as possible.
 
-The code that you generate should go in the folder `src-tester`.
+The code that you generate should go in the folder `src-tester`. Any project you create, should be
+in a subfolder.
 
 When you think you are done generating code the code **MUST** build successfully. If there are build
 errors, edit the code until there are no build errors.
