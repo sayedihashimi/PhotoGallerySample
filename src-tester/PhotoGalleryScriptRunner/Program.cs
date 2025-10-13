@@ -369,38 +369,21 @@ internal static class Program
 
         steps.Add(new Step(n++, "Ensure using Azure.Storage.Blobs (Step 25)", ctx => ModifyWebProgram(ctx, content => EnsureUsing(content, "using Azure.Storage.Blobs;"))));
 
-        steps.Add(new Step(n++, "Add /photos/{*name} endpoint above app.Run() (Step 26)", ctx => ModifyWebProgram(ctx, content =>
+        steps.Add(new Step(n++, "Update root MapGet to list blobs (Step 26)", ctx => ModifyWebProgram(ctx, content =>
         {
-            // Idempotent: if endpoint already present, do nothing
-            if (content.Contains("app.MapGet(\"/photos/{*name}\"", StringComparison.Ordinal))
-                return content;
-
-            var endpoint = "app.MapGet(\"/photos/{*name}\", async (string name, BlobContainerClient client) =>\n{\n    if (string.IsNullOrWhiteSpace(name))\n    {\n        return Results.BadRequest();\n    }\n\n    var blob = client.GetBlobClient(name);\n    if (!await blob.ExistsAsync())\n    {\n        return Results.NotFound();\n    }\n\n    // Try to infer a simple content type from the extension; fall back to octet-stream\n    var contentType = GetContentType(name);\n    var stream = await blob.OpenReadAsync();\n    return Results.File(stream, contentType);\n});";
-
-            if (content.Contains("app.Run();", StringComparison.Ordinal))
-            {
-                content = InsertBeforeLineContaining(content, "app.Run();", endpoint);
-            }
-            else
-            {
-                content += "\n" + endpoint + "\n"; // Fallback append
-            }
+            if (content.Contains("GetBlobsAsync()", StringComparison.Ordinal) || content.Contains("client.GetBlobsAsync()", StringComparison.Ordinal))
+                return content; // Already transformed
+            content = EnsureUsing(content, "using PhotoGallery.Web.Components;");
+            content = EnsureUsing(content, "using Microsoft.AspNetCore.Http.HttpResults;");
+            var map = "app.MapGet(\"/\", async (BlobContainerClient client) =>\n{\n    var blobs = client.GetBlobsAsync();\n    var photos = new List<string>();\n    await foreach(var photo in blobs)\n    {\n        photos.Add(photo.Name);\n    }\n    return new RazorComponentResult<PhotoList>(new {Photos = photos } );\n});";
+            content = ReplaceMapGet(content, map);
             return content;
         })));
 
-        steps.Add(new Step(n++, "Add using System.IO (Step 27)", ctx => ModifyWebProgram(ctx, content => EnsureUsing(content, "using System.IO;"))));
-
-        steps.Add(new Step(n++, "Add GetContentType helper (Step 28)", ctx => ModifyWebProgram(ctx, content =>
-        {
-            if (content.Contains("GetContentType(string name)", StringComparison.Ordinal))
-                return content;
-            if (content.Contains("app.Run();", StringComparison.Ordinal))
-            {
-                var method = "static string GetContentType(string name)\n{\n    var ext = Path.GetExtension(name).ToLowerInvariant();\n    return ext switch\n    {\n        \".jpg\" or \".jpeg\" => \"image/jpeg\",\n        \".png\" => \"image/png\",\n        \".gif\" => \"image/gif\",\n        \".webp\" => \"image/webp\",\n        \".bmp\" => \"image/bmp\",\n        \".svg\" => \"image/svg+xml\",\n        _ => \"application/octet-stream\"\n    };\n}";
-                content = InsertAfterLineContaining(content, "app.Run();", method + "\n");
-            }
-            return content;
-        })));
+        // Step 27 removed (was using System.IO)
+        n++;
+        // Step 28 removed (was GetContentType helper)
+        n++;
 
         steps.Add(new Step(n++, "Replace PhotoList.razor with upload form (Step 29)", async ctx =>
         {
@@ -553,9 +536,40 @@ internal static class Program
             await Task.CompletedTask;
         }));
 
-    steps.Add(new Step(n++, "Upload and verify listing (Step 40)", ctx => ManualPause()));
+    // Inserted new Steps 40-42 per updated spec
+    steps.Add(new Step(n++, "Add /photos/{*name} endpoint above app.Run() (Step 40)", ctx => ModifyWebProgram(ctx, content =>
+        {
+            if (content.Contains("app.MapGet(\"/photos/{*name}\"", StringComparison.Ordinal))
+                return content;
+            var endpoint = "app.MapGet(\"/photos/{*name}\", async (string name, BlobContainerClient client) =>\n{\n    if (string.IsNullOrWhiteSpace(name))\n    {\n        return Results.BadRequest();\n    }\n\n    var blob = client.GetBlobClient(name);\n    if (!await blob.ExistsAsync())\n    {\n        return Results.NotFound();\n    }\n\n    // Try to infer a simple content type from the extension; fall back to octet-stream\n    var contentType = GetContentType(name);\n    var stream = await blob.OpenReadAsync();\n    return Results.File(stream, contentType);\n});";
+            if (content.Contains("app.Run();", StringComparison.Ordinal))
+            {
+                content = InsertBeforeLineContaining(content, "app.Run();", endpoint);
+            }
+            else
+            {
+                content += "\n" + endpoint + "\n";
+            }
+            return content;
+        })));
 
-    steps.Add(new Step(n++, "Add wwwroot folder (Step 41)", async ctx =>
+    steps.Add(new Step(n++, "Add using System.IO (Step 41)", ctx => ModifyWebProgram(ctx, content => EnsureUsing(content, "using System.IO;"))));
+
+    steps.Add(new Step(n++, "Add GetContentType helper (Step 42)", ctx => ModifyWebProgram(ctx, content =>
+        {
+            if (content.Contains("GetContentType(string name)", StringComparison.Ordinal))
+                return content;
+            if (content.Contains("app.Run();", StringComparison.Ordinal))
+            {
+                var method = "static string GetContentType(string name)\n{\n    var ext = Path.GetExtension(name).ToLowerInvariant();\n    return ext switch\n    {\n        \".jpg\" or \".jpeg\" => \"image/jpeg\",\n        \".png\" => \"image/png\",\n        \".gif\" => \"image/gif\",\n        \".webp\" => \"image/webp\",\n        \".bmp\" => \"image/bmp\",\n        \".svg\" => \"image/svg+xml\",\n        _ => \"application/octet-stream\"\n    };\n}";
+                content = InsertAfterLineContaining(content, "app.Run();", method + "\n");
+            }
+            return content;
+        })));
+
+    steps.Add(new Step(n++, "The app should be working (Step 43)", ctx => ManualPause()));
+
+    steps.Add(new Step(n++, "Add wwwroot folder (Step 44)", async ctx =>
         {
             var (_, webDir) = ResolveProjectDirs(ctx);
             if (webDir is null) return;
@@ -563,7 +577,7 @@ internal static class Program
             await Task.CompletedTask;
         }));
 
-    steps.Add(new Step(n++, "Add theme.css file (Step 42)", async ctx =>
+    steps.Add(new Step(n++, "Add theme.css file (Step 45)", async ctx =>
         {
             var (_, webDir) = ResolveProjectDirs(ctx);
             if (webDir is null) return;
@@ -575,14 +589,17 @@ internal static class Program
             await Task.CompletedTask;
         }));
 
-    steps.Add(new Step(n++, "Add UseStaticFiles (Step 43)", ctx => ModifyWebProgram(ctx, content =>
+    // Step 46 intentionally skipped per spec
+    n++;
+
+    steps.Add(new Step(n++, "Add UseStaticFiles (Step 47)", ctx => ModifyWebProgram(ctx, content =>
         {
             if (!content.Contains("UseStaticFiles()", StringComparison.Ordinal))
                 content = InsertAfterLineContaining(content, "var app = builder.Build()", "app.UseStaticFiles();");
             return content;
         })));
 
-    steps.Add(new Step(n++, "Link theme.css in head (Step 44)", async ctx =>
+    steps.Add(new Step(n++, "Link theme.css in head (Step 48)", async ctx =>
         {
             var file = ResolveWebComponent(ctx, "PhotoList.razor");
             if (file is null) return;
@@ -595,7 +612,7 @@ internal static class Program
             await Task.CompletedTask;
         }));
 
-    steps.Add(new Step(n++, "Replace PhotoList.razor with final UI (Step 45)", async ctx =>
+    steps.Add(new Step(n++, "Replace PhotoList.razor with final UI (Step 49)", async ctx =>
         {
             var file = ResolveWebComponent(ctx, "PhotoList.razor");
             if (file is null) return;
@@ -607,7 +624,7 @@ internal static class Program
             await Task.CompletedTask;
         }));
 
-    steps.Add(new Step(n++, "Replace theme.css with dark theme (Step 46)", async ctx =>
+    steps.Add(new Step(n++, "Replace theme.css with dark theme (Step 50)", async ctx =>
         {
             var (_, webDir) = ResolveProjectDirs(ctx);
             if (webDir is null) return;
@@ -622,7 +639,7 @@ internal static class Program
             await Task.CompletedTask;
         }));
 
-    steps.Add(new Step(n++, "Final verification (Step 47)", ctx => ManualPause()));
+    steps.Add(new Step(n++, "Final verification (Step 51)", ctx => ManualPause()));
 
         return steps;
     }
@@ -704,10 +721,34 @@ internal static class Program
         {
             if (lines[i].Contains("app.MapGet("))
             {
-                // capture until semicolon line
-                var j = i;
-                while (j < lines.Length && !lines[j].Contains(";")) j++;
-                if (j < lines.Length) j++;
+                // Improved capture: if single-line expression, just replace that line.
+                int j;
+                if (lines[i].Contains("=>") && lines[i].Contains(");"))
+                {
+                    j = i + 1; // single-line MapGet
+                }
+                else
+                {
+                    // Multi-line lambda: look for the terminating line containing '});'
+                    j = i + 1;
+                    bool foundEnd = false;
+                    for (; j < lines.Length; j++)
+                    {
+                        if (lines[j].Contains("});"))
+                        {
+                            j++; // include the terminating line
+                            foundEnd = true;
+                            break;
+                        }
+                    }
+                    if (!foundEnd)
+                    {
+                        // Fallback to previous heuristic: first semicolon
+                        j = i;
+                        while (j < lines.Length && !lines[j].Contains(";")) j++;
+                        if (j < lines.Length) j++;
+                    }
+                }
                 var before = lines.Take(i).ToList();
                 var after = lines.Skip(j).ToList();
                 before.AddRange(newMapGet.Split('\n'));

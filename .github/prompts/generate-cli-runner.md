@@ -185,48 +185,18 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     ```cs
     using Azure.Storage.Blobs;
     ```
-26. `PG.Web.Program.cs` add the code below above `app.Run();`.
+26. `PG.Web.Program.cs` update `app.MapGet` to be the following.
     ```cs
-        app.MapGet("/photos/{*name}", async (string name, BlobContainerClient client) =>
-        {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                return Results.BadRequest();
-            }
-
-            var blob = client.GetBlobClient(name);
-            if (!await blob.ExistsAsync())
-            {
-                return Results.NotFound();
-            }
-
-            // Try to infer a simple content type from the extension; fall back to octet-stream
-            var contentType = GetContentType(name);
-            var stream = await blob.OpenReadAsync();
-            return Results.File(stream, contentType);
-        });
-    ```
-27. `PG.Web.Program.cs` - add the using statement below at the top of the file.
-    ```cs
-    using System.IO
-    ```
-28. `PG.Web.Program.cs` - add after `app.Run();`
-    ```cs
-    static string GetContentType(string name)
+    app.MapGet("/", async (BlobContainerClient client) =>
     {
-        var ext = Path.GetExtension(name).ToLowerInvariant();
-        return ext switch
+        var blobs = client.GetBlobsAsync();
+        var photos = new List<string>();
+        await foreach(var photo in blobs)
         {
-            ".jpg" or ".jpeg" => "image/jpeg",
-            ".png" => "image/png",
-            ".gif" => "image/gif",
-            ".webp" => "image/webp",
-            ".bmp" => "image/bmp",
-            ".svg" => "image/svg+xml",
-            _ => "application/octet-stream"
-        };
-    }
-    ```
+            photos.Add(photo.Name);
+        }
+        return new RazorComponentResult<PhotoList>(new {Photos = photos } );
+    });
 29. `PG.Web.PhotoList.razor` – replace with the code below
     ```
     @code
@@ -306,23 +276,65 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     ```html
     <AntiforgeryToken />
     ```
-40. The app should be working, after uploading an image, the file name should be listed on the web page.
-41. `PG.Web` - add a `wwwroot` folder
-42. `PG.Web` - add a new file at `wwwroot/theme.css`, with the content below
+40. `PG.Web.Program.cs` add the code below above `app.Run();`.
+    ```cs
+        app.MapGet("/photos/{*name}", async (string name, BlobContainerClient client) =>
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return Results.BadRequest();
+            }
+
+            var blob = client.GetBlobClient(name);
+            if (!await blob.ExistsAsync())
+            {
+                return Results.NotFound();
+            }
+
+            // Try to infer a simple content type from the extension; fall back to octet-stream
+            var contentType = GetContentType(name);
+            var stream = await blob.OpenReadAsync();
+            return Results.File(stream, contentType);
+        });
+    ```
+41. `PG.Web.Program.cs` - add the using statement below at the top of the file.
+    ```cs
+    using System.IO
+    ```
+42. `PG.Web.Program.cs` - add after `app.Run();`
+    ```cs
+    static string GetContentType(string name)
+    {
+        var ext = Path.GetExtension(name).ToLowerInvariant();
+        return ext switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".gif" => "image/gif",
+            ".webp" => "image/webp",
+            ".bmp" => "image/bmp",
+            ".svg" => "image/svg+xml",
+            _ => "application/octet-stream"
+        };
+    }
+    ```
+43. The app should be working, after uploading an image, the file name should be listed on the web page.
+44. `PG.Web` - add a `wwwroot` folder
+45. `PG.Web` - add a new file at `wwwroot/theme.css`, with the content below
     ```css
     body {
         background-color: gray;
     }
     ```
-43. `PG.Web.Program.cs` - add after `var app = builder.Build()`
+47. `PG.Web.Program.cs` - add after `var app = builder.Build()`
     ```cs
     app.UseStaticFiles();
     ```
-44. `PG.Web.PhotoList.razor` - add in `<head>`
+48. `PG.Web.PhotoList.razor` - add in `<head>`
     ```html
     <link rel="stylesheet" href="/theme.css"/>
     ```
-45. `PG.Web.PhotoList.razor` - replace with the code below
+49. `PG.Web.PhotoList.razor` - replace with the code below
     ```
     @using Microsoft.AspNetCore.Components.Forms
     @code {
@@ -405,7 +417,7 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     </body>
     </html>
     ```
-46. `PG.Web.wwwroot.theme.css` - replace with the content below
+50. `PG.Web.wwwroot.theme.css` - replace with the content below
     ```css
     /* Global dark theme tokens */
     :root {
@@ -450,4 +462,4 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     ul.gallery { list-style: none !important; margin: 0; padding: 0; }
     ul.gallery > li { list-style: none !important; }
     ```
-47. The app should be working now.
+51. The app should be working now.
