@@ -89,6 +89,7 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     ```bash
     dotnet add reference --project .\PhotoGallery.AppHost\PhotoGallery.AppHost.csproj .\PhotoGallery.Web\PhotoGallery.Web.csproj
     ```
+    Copilot: run the command in the snippet above for this step.
 11. `AppHost.cs` add after `var builder = …`
     ```cs
     builder.AddProject<Projects.PhotoGallery_Web>("webapp");
