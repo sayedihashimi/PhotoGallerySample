@@ -206,7 +206,11 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
             return Results.File(stream, contentType);
         });
     ```
-27. `PG.Web.Program.cs` - add after `app.Run();`
+27. `PG.Web.Program.cs` - add the using statement below at the top of the file.
+    ```cs
+    using System.IO
+    ```
+28. `PG.Web.Program.cs` - add after `app.Run();`
     ```cs
     static string GetContentType(string name)
     {
@@ -223,7 +227,7 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
         };
     }
     ```
-28. `PG.Web.PhotoList.razor` – replace with the code below
+29. `PG.Web.PhotoList.razor` – replace with the code below
     ```
     @code
     {
@@ -259,19 +263,19 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     </body>
     </html>
     ```
-29. `PG.Web`: add Project Reference to ServiceDefaults project. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
+30. `PG.Web`: add Project Reference to ServiceDefaults project. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
     ```bash
     dotnet add reference --project .\PhotoGallery.Web\PhotoGallery.Web.csproj .\PhotoGallery.ServiceDefaults\PhotoGallery.ServiceDefaults.csproj
     ```
-30. `PG.Web.Program.cs` add after `var builder = …`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
+31. `PG.Web.Program.cs` add after `var builder = …`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
     ```cs
     builder.AddServiceDefaults();
     ```
-31. `PG.Web.Program.cs` add after `var app = builder.Build()`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
+32. `PG.Web.Program.cs` add after `var app = builder.Build()`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
     ```cs
     app.MapDefaultEndpoints();
     ```
-32. `PG.Web.Program.cs` before the line 'app.Run();' add the code below
+33. `PG.Web.Program.cs` before the line 'app.Run();' add the code below
     ```cs
     app.MapPost("/upload", async (IFormFile photo, BlobContainerClient client) =>
     {
@@ -284,41 +288,41 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
         return Results.Redirect("/");
     });
     ```
-33. Verify in the dashboard that Traces has webapp showing up in the Resource dropdown.
-34. If you try webapp, you’ll get antiforgery errors. The exception should be in Structured logs in the dashboard.
-35. `PG.Web.Program.cs` – add before `var app = builder.Build();`
+34. Verify in the dashboard that Traces has webapp showing up in the Resource dropdown.
+35. If you try webapp, you’ll get antiforgery errors. The exception should be in Structured logs in the dashboard.
+36. `PG.Web.Program.cs` – add before `var app = builder.Build();`
     ```cs
     builder.Services.AddAntiforgery();
     ```
-36. `PG.Web.Program.cs` – add after `var app = builder.Build()`
+37. `PG.Web.Program.cs` – add after `var app = builder.Build()`
     ```cs
     app.UseAntiforgery();
     ```
-37. `PG.Web.PhotoList.razor` – add using at the top of the file. _Skip if using VS. VS Shoud insert this on paste automatically._
+38. `PG.Web.PhotoList.razor` – add using at the top of the file. _Skip if using VS. VS Shoud insert this on paste automatically._
     ```
     @using Microsoft.AspNetCore.Components.Forms
     ```
-38. `PG.Web.PhotoList.razor` – Add on a new line after the line contining the `<form class="upload-form"` tag.
+39. `PG.Web.PhotoList.razor` – Add on a new line after the line contining the `<form class="upload-form"` tag.
     ```html
     <AntiforgeryToken />
     ```
-39. The app should be working, after uploading an image, the file name should be listed on the web page.
-40. `PG.Web` - add a `wwwroot` folder
-41. `PG.Web` - add a new file at `wwwroot/theme.css`, with the content below
+40. The app should be working, after uploading an image, the file name should be listed on the web page.
+41. `PG.Web` - add a `wwwroot` folder
+42. `PG.Web` - add a new file at `wwwroot/theme.css`, with the content below
     ```css
     body {
         background-color: gray;
     }
     ```
-42. `PG.Web.Program.cs` - add after `var app = builder.Build()`
+43. `PG.Web.Program.cs` - add after `var app = builder.Build()`
     ```cs
     app.UseStaticFiles();
     ```
-43. `PG.Web.PhotoList.razor` - add in `<head>`
+44. `PG.Web.PhotoList.razor` - add in `<head>`
     ```html
     <link rel="stylesheet" href="/theme.css"/>
     ```
-44. `PG.Web.PhotoList.razor` - replace with the code below
+45. `PG.Web.PhotoList.razor` - replace with the code below
     ```
     @using Microsoft.AspNetCore.Components.Forms
     @code {
@@ -401,7 +405,7 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     </body>
     </html>
     ```
-45. `PG.Web.wwwroot.theme.css` - replace with the content below
+46. `PG.Web.wwwroot.theme.css` - replace with the content below
     ```css
     /* Global dark theme tokens */
     :root {
@@ -446,4 +450,4 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     ul.gallery { list-style: none !important; margin: 0; padding: 0; }
     ul.gallery > li { list-style: none !important; }
     ```
-46. The app should be working now.
+47. The app should be working now.
