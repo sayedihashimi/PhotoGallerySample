@@ -29,6 +29,11 @@ errors, edit the code until there are no build errors.
 
 If you run powershell, pwsh, you should always pass in `-NoProfile`.
 
+Do **NOT** reference any of the files in these folders
+- `assets`
+- `src`
+You **MUST** ignore those files.
+
 ### Script instructions
 
 # PhotoGallary Setup

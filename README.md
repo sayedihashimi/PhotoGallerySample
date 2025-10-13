@@ -14,6 +14,27 @@ The `start-here` branch has comments for all the code that will be added.
 There is also a [PhotoList.razor.txt](assets/PhotoList.razor.txt) in the assets folder. This is a version of the
 PhotoList.razor file that has code to get started and some commented out code that you can paste in later.
 
+## Test Script Runner (Experimental)
+An interactive console utility has been added at `src-tester/PhotoGallery.TestRunner` to help guide and (when possible) automate the 45 demo steps below.
+
+It uses Spectre.Console to present each step with options:
+1. Execute step (runs commands or performs file generation when possible)
+2. Go back
+3. Quit
+
+Some steps remain manual (for example the fully interactive `aspire new` flow, or detailed source edits later in the list). For those, the runner shows the instructions and lets you mark the step complete.
+
+### Running the test runner
+Requires a .NET 10 (preview) SDK. If you don't have it yet, you can temporarily edit the tester csproj to target `net9.0`.
+
+```pwsh
+dotnet run --project .\src-tester\PhotoGallery.TestRunner\PhotoGallery.TestRunner.csproj
+```
+
+When prompted, supply (or create) an empty working folder. The runner will create / modify files inside that folder—NOT inside this repository—so you can quickly validate the scenario from scratch.
+
+> Note: Commands that invoke PowerShell use `-NoProfile` per guidelines. Output from executed steps is captured and shown. Errors will stop a step but you can retry after fixing the environment.
+
 ## Demo Steps
 To reproduce the PhotoGallery using the dotnet CLI, all steps are below. When running a command, run it from the new directory that you create in step 1.
 
