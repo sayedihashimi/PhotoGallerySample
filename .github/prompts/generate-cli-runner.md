@@ -246,7 +246,7 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     ```cs
     app.MapDefaultEndpoints();
     ```
-31. `PG.Web.Program.cs` add after `app.MapGet …`
+31. `PG.Web.Program.cs` before the line 'app.Run();' add the code below
     ```cs
     app.MapPost("/upload", async (IFormFile photo, BlobContainerClient client) =>
     {

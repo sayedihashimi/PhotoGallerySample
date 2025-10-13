@@ -375,7 +375,7 @@ internal static class Program
             {
                 content = EnsureUsing(content, "using PhotoGallery.Web.Components;");
                 content = EnsureUsing(content, "using Microsoft.AspNetCore.Http.HttpResults;");
-                var map = "app.MapGet(\"/\", async (BlobContainerClient client) =>\n    {\n        var blobs = client.GetBlobsAsync();\n        var photos = new List<string>();\n        await foreach(var photo in blobs)\n        {\n            photos.Add(photo.Name);\n        }\n        return new RazorComponentResult<PhotoList>(new {Photos = photos } );\n    });";
+                var map = "app.MapGet(\"/\", async (BlobContainerClient client) =>\n    {\n        var blobs = client.GetBlobsAsync();\n        var photos = new List<string>();\n        await foreach(var photo in blobs)\n        {\n            photos.Add(photo.Name);\n        }\n        return new RazorComponentResult<PhotoList>(new {Photos = photos } );\n";
                 content = ReplaceMapGet(content, map);
             }
             return content;
