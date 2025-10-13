@@ -508,13 +508,19 @@ internal static class Program
             await Task.CompletedTask;
         }));
 
-        steps.Add(new Step(n++, "Add <AntiforgeryToken /> after form line (Step 37)", async ctx =>
+        steps.Add(new Step(n++, "Add <AntiforgeryToken /> after upload-form line (Step 37)", async ctx =>
         {
             var file = ResolveWebComponent(ctx, "PhotoList.razor");
             if (file is null) return;
             var lines = File.ReadAllLines(file).ToList();
             if (lines.Any(l => l.Contains("AntiforgeryToken", StringComparison.Ordinal))) { await Task.CompletedTask; return; }
-            int formIndex = lines.FindIndex(l => l.Contains("<form", StringComparison.Ordinal));
+            // Prefer the specific upload-form class line
+            int formIndex = lines.FindIndex(l => l.Contains("<form", StringComparison.Ordinal) && l.Contains("upload-form", StringComparison.Ordinal));
+            if (formIndex < 0)
+            {
+                // Fallback: any <form if specific one not found
+                formIndex = lines.FindIndex(l => l.Contains("<form", StringComparison.Ordinal));
+            }
             if (formIndex >= 0)
             {
                 // Determine indentation from next line or form line
