@@ -187,18 +187,43 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     ```
 26. `PG.Web.Program.cs` update `app.MapGet` to be the following.
     ```cs
-    app.MapGet("/", async (BlobContainerClient client) =>
-    {
-        var blobs = client.GetBlobsAsync();
-        var photos = new List<string>();
-        await foreach(var photo in blobs)
+        app.MapGet("/photos/{*name}", async (string name, BlobContainerClient client) =>
         {
-            photos.Add(photo.Name);
-        }
-        return new RazorComponentResult<PhotoList>(new {Photos = photos } );
-    });
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return Results.BadRequest();
+            }
+
+            var blob = client.GetBlobClient(name);
+            if (!await blob.ExistsAsync())
+            {
+                return Results.NotFound();
+            }
+
+            // Try to infer a simple content type from the extension; fall back to octet-stream
+            var contentType = GetContentType(name);
+            var stream = await blob.OpenReadAsync();
+            return Results.File(stream, contentType);
+        });
     ```
-27. `PG.Web.PhotoList.razor` – replace with the code below
+27. `PG.Web.Program.cs` - add after `app.Run();`
+    ```cs
+    static string GetContentType(string name)
+    {
+        var ext = Path.GetExtension(name).ToLowerInvariant();
+        return ext switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".gif" => "image/gif",
+            ".webp" => "image/webp",
+            ".bmp" => "image/bmp",
+            ".svg" => "image/svg+xml",
+            _ => "application/octet-stream"
+        };
+    }
+    ```
+28. `PG.Web.PhotoList.razor` – replace with the code below
     ```
     @code
     {
@@ -234,19 +259,19 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     </body>
     </html>
     ```
-28. `PG.Web`: add Project Reference to ServiceDefaults project. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
+29. `PG.Web`: add Project Reference to ServiceDefaults project. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
     ```bash
     dotnet add reference --project .\PhotoGallery.Web\PhotoGallery.Web.csproj .\PhotoGallery.ServiceDefaults\PhotoGallery.ServiceDefaults.csproj
     ```
-29. `PG.Web.Program.cs` add after `var builder = …`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
+30. `PG.Web.Program.cs` add after `var builder = …`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
     ```cs
     builder.AddServiceDefaults();
     ```
-30. `PG.Web.Program.cs` add after `var app = builder.Build()`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
+31. `PG.Web.Program.cs` add after `var app = builder.Build()`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
     ```cs
     app.MapDefaultEndpoints();
     ```
-31. `PG.Web.Program.cs` before the line 'app.Run();' add the code below
+32. `PG.Web.Program.cs` before the line 'app.Run();' add the code below
     ```cs
     app.MapPost("/upload", async (IFormFile photo, BlobContainerClient client) =>
     {
@@ -259,41 +284,41 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
         return Results.Redirect("/");
     });
     ```
-32. Verify in the dashboard that Traces has webapp showing up in the Resource dropdown.
-33. If you try webapp, you’ll get antiforgery errors. The exception should be in Structured logs in the dashboard.
-34. `PG.Web.Program.cs` – add before `var app = builder.Build();`
+33. Verify in the dashboard that Traces has webapp showing up in the Resource dropdown.
+34. If you try webapp, you’ll get antiforgery errors. The exception should be in Structured logs in the dashboard.
+35. `PG.Web.Program.cs` – add before `var app = builder.Build();`
     ```cs
     builder.Services.AddAntiforgery();
     ```
-35. `PG.Web.Program.cs` – add after `var app = builder.Build()`
+36. `PG.Web.Program.cs` – add after `var app = builder.Build()`
     ```cs
     app.UseAntiforgery();
     ```
-36. `PG.Web.PhotoList.razor` – add using at the top of the file. _Skip if using VS. VS Shoud insert this on paste automatically._
+37. `PG.Web.PhotoList.razor` – add using at the top of the file. _Skip if using VS. VS Shoud insert this on paste automatically._
     ```
     @using Microsoft.AspNetCore.Components.Forms
     ```
-37. `PG.Web.PhotoList.razor` – Add on a new line after the line contining the `<form class="upload-form"` tag.
+38. `PG.Web.PhotoList.razor` – Add on a new line after the line contining the `<form class="upload-form"` tag.
     ```html
     <AntiforgeryToken />
     ```
-38. The app should be working, after uploading an image, the file name should be listed on the web page.
-39. `PG.Web` - add a `wwwroot` folder
-40. `PG.Web` - add a new file at `wwwroot/theme.css`, with the content below
+39. The app should be working, after uploading an image, the file name should be listed on the web page.
+40. `PG.Web` - add a `wwwroot` folder
+41. `PG.Web` - add a new file at `wwwroot/theme.css`, with the content below
     ```css
     body {
         background-color: gray;
     }
     ```
-41. `PG.Web.Program.cs` - add after `var app = builder.Build()`
+42. `PG.Web.Program.cs` - add after `var app = builder.Build()`
     ```cs
     app.UseStaticFiles();
     ```
-42. `PG.Web.PhotoList.razor` - add in `<head>`
+43. `PG.Web.PhotoList.razor` - add in `<head>`
     ```html
     <link rel="stylesheet" href="/theme.css"/>
     ```
-43. `PG.Web.PhotoList.razor` - replace with the code below
+44. `PG.Web.PhotoList.razor` - replace with the code below
     ```
     @using Microsoft.AspNetCore.Components.Forms
     @code {
@@ -376,7 +401,7 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     </body>
     </html>
     ```
-44. `PG.Web.wwwroot.theme.css` - replace with the content below
+45. `PG.Web.wwwroot.theme.css` - replace with the content below
     ```css
     /* Global dark theme tokens */
     :root {
@@ -421,4 +446,4 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     ul.gallery { list-style: none !important; margin: 0; padding: 0; }
     ul.gallery > li { list-style: none !important; }
     ```
-45. The app should be working now.
+46. The app should be working now.

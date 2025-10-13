@@ -369,19 +369,41 @@ internal static class Program
 
         steps.Add(new Step(n++, "Ensure using Azure.Storage.Blobs (Step 25)", ctx => ModifyWebProgram(ctx, content => EnsureUsing(content, "using Azure.Storage.Blobs;"))));
 
-        steps.Add(new Step(n++, "Update MapGet to enumerate blobs (Step 26)", ctx => ModifyWebProgram(ctx, content =>
+        steps.Add(new Step(n++, "Add photo file-serving endpoint /photos (Step 26)", ctx => ModifyWebProgram(ctx, content =>
         {
-            if (!content.Contains("BlobContainerClient", StringComparison.Ordinal) || !content.Contains("GetBlobsAsync", StringComparison.Ordinal))
+            // Ensure root MapGet enumerates blobs (if not already transformed)
+            if (!content.Contains("GetBlobsAsync", StringComparison.Ordinal))
             {
                 content = EnsureUsing(content, "using PhotoGallery.Web.Components;");
                 content = EnsureUsing(content, "using Microsoft.AspNetCore.Http.HttpResults;");
-                var map = "app.MapGet(\"/\", async (BlobContainerClient client) =>\n    {\n        var blobs = client.GetBlobsAsync();\n        var photos = new List<string>();\n        await foreach(var photo in blobs)\n        {\n            photos.Add(photo.Name);\n        }\n        return new RazorComponentResult<PhotoList>(new {Photos = photos } );\n";
+                var map = "app.MapGet(\"/\", async (BlobContainerClient client) =>\n    {\n        var blobs = client.GetBlobsAsync();\n        var photos = new List<string>();\n        await foreach(var photo in blobs)\n        {\n            photos.Add(photo.Name);\n        }\n        return new RazorComponentResult<PhotoList>(new {Photos = photos } );\n    });";
                 content = ReplaceMapGet(content, map);
+            }
+            // Add /photos/{*name} endpoint for serving individual blobs
+            if (!content.Contains("/photos/{*name}", StringComparison.Ordinal))
+            {
+                var endpoint = "app.MapGet(\"/photos/{*name}\", async (string name, BlobContainerClient client) =>\n{\n    if (string.IsNullOrWhiteSpace(name))\n        return Results.BadRequest();\n    var blob = client.GetBlobClient(name);\n    if (!await blob.ExistsAsync())\n        return Results.NotFound();\n    var contentType = GetContentType(name);\n    var stream = await blob.OpenReadAsync();\n    return Results.File(stream, contentType);\n});";
+                // Insert after existing root MapGet if possible
+                content = InsertAfterLineContaining(content, "app.MapGet(\"/\"", endpoint, allowMultiple: true);
             }
             return content;
         })));
 
-        steps.Add(new Step(n++, "Replace PhotoList.razor with upload form (Step 27)", async ctx =>
+        steps.Add(new Step(n++, "Add using System.IO (Step 27)", ctx => ModifyWebProgram(ctx, content => EnsureUsing(content, "using System.IO;"))));
+
+        steps.Add(new Step(n++, "Add GetContentType helper (Step 28)", ctx => ModifyWebProgram(ctx, content =>
+        {
+            if (content.Contains("GetContentType(string name)", StringComparison.Ordinal))
+                return content;
+            if (content.Contains("app.Run();", StringComparison.Ordinal))
+            {
+                var method = "static string GetContentType(string name)\n{\n    var ext = Path.GetExtension(name).ToLowerInvariant();\n    return ext switch\n    {\n        \".jpg\" or \".jpeg\" => \"image/jpeg\",\n        \".png\" => \"image/png\",\n        \".gif\" => \"image/gif\",\n        \".webp\" => \"image/webp\",\n        \".bmp\" => \"image/bmp\",\n        \".svg\" => \"image/svg+xml\",\n        _ => \"application/octet-stream\"\n    };\n}";
+                content = InsertAfterLineContaining(content, "app.Run();", method + "\n");
+            }
+            return content;
+        })));
+
+        steps.Add(new Step(n++, "Replace PhotoList.razor with upload form (Step 29)", async ctx =>
         {
             var file = ResolveWebComponent(ctx, "PhotoList.razor");
             if (file is null) return;
@@ -427,7 +449,7 @@ internal static class Program
             await Task.CompletedTask;
         }));
 
-        steps.Add(new Step(n++, "Add project reference Web -> ServiceDefaults (Step 28)", async ctx =>
+    steps.Add(new Step(n++, "Add project reference Web -> ServiceDefaults (Step 30)", async ctx =>
         {
             EnsureWorking(ctx);
             var (appHostDir, webDir) = ResolveProjectDirs(ctx);
@@ -444,21 +466,21 @@ internal static class Program
             }
         }));
 
-        steps.Add(new Step(n++, "Add builder.AddServiceDefaults (Step 29)", ctx => ModifyWebProgram(ctx, content =>
+    steps.Add(new Step(n++, "Add builder.AddServiceDefaults (Step 31)", ctx => ModifyWebProgram(ctx, content =>
         {
             if (!content.Contains("AddServiceDefaults()", StringComparison.Ordinal))
                 content = InsertAfterLineContaining(content, "var builder", "builder.AddServiceDefaults();");
             return content;
         })));
 
-        steps.Add(new Step(n++, "Add app.MapDefaultEndpoints (Step 30)", ctx => ModifyWebProgram(ctx, content =>
+    steps.Add(new Step(n++, "Add app.MapDefaultEndpoints (Step 32)", ctx => ModifyWebProgram(ctx, content =>
         {
             if (!content.Contains("MapDefaultEndpoints", StringComparison.Ordinal))
                 content = InsertAfterLineContaining(content, "var app = builder.Build()", "app.MapDefaultEndpoints();");
             return content;
         })));
 
-        steps.Add(new Step(n++, "Add upload endpoint MapPost /upload before app.Run() (Step 31)", ctx => ModifyWebProgram(ctx, content =>
+    steps.Add(new Step(n++, "Add upload endpoint MapPost /upload before app.Run() (Step 33)", ctx => ModifyWebProgram(ctx, content =>
         {
             if (!content.Contains("/upload", StringComparison.Ordinal))
             {
@@ -478,24 +500,24 @@ internal static class Program
             return content;
         })));
 
-        steps.Add(new Step(n++, "Verify traces show webapp (Step 32)", ctx => ManualPause()));
-        steps.Add(new Step(n++, "Observe antiforgery errors (Step 33)", ctx => ManualPause()));
+    steps.Add(new Step(n++, "Verify traces show webapp (Step 34)", ctx => ManualPause()));
+    steps.Add(new Step(n++, "Observe antiforgery errors (Step 35)", ctx => ManualPause()));
 
-        steps.Add(new Step(n++, "Add AddAntiforgery service (Step 34)", ctx => ModifyWebProgram(ctx, content =>
+    steps.Add(new Step(n++, "Add AddAntiforgery service (Step 36)", ctx => ModifyWebProgram(ctx, content =>
         {
             if (!content.Contains("AddAntiforgery", StringComparison.Ordinal))
                 content = InsertBeforeLineContaining(content, "var app = builder.Build()", "builder.Services.AddAntiforgery();");
             return content;
         })));
 
-        steps.Add(new Step(n++, "Add UseAntiforgery middleware (Step 35)", ctx => ModifyWebProgram(ctx, content =>
+    steps.Add(new Step(n++, "Add UseAntiforgery middleware (Step 37)", ctx => ModifyWebProgram(ctx, content =>
         {
             if (!content.Contains("UseAntiforgery()", StringComparison.Ordinal))
                 content = InsertAfterLineContaining(content, "var app = builder.Build()", "app.UseAntiforgery();");
             return content;
         })));
 
-        steps.Add(new Step(n++, "Add @using for Antiforgery in razor (Step 36)", async ctx =>
+    steps.Add(new Step(n++, "Add @using for Antiforgery in razor (Step 38)", async ctx =>
         {
             var file = ResolveWebComponent(ctx, "PhotoList.razor");
             if (file is null) return;
@@ -508,7 +530,7 @@ internal static class Program
             await Task.CompletedTask;
         }));
 
-        steps.Add(new Step(n++, "Add <AntiforgeryToken /> after upload-form line (Step 37)", async ctx =>
+    steps.Add(new Step(n++, "Add <AntiforgeryToken /> after upload-form line (Step 39)", async ctx =>
         {
             var file = ResolveWebComponent(ctx, "PhotoList.razor");
             if (file is null) return;
@@ -532,9 +554,9 @@ internal static class Program
             await Task.CompletedTask;
         }));
 
-        steps.Add(new Step(n++, "Upload and verify listing (Step 38)", ctx => ManualPause()));
+    steps.Add(new Step(n++, "Upload and verify listing (Step 40)", ctx => ManualPause()));
 
-        steps.Add(new Step(n++, "Add wwwroot folder (Step 39)", async ctx =>
+    steps.Add(new Step(n++, "Add wwwroot folder (Step 41)", async ctx =>
         {
             var (_, webDir) = ResolveProjectDirs(ctx);
             if (webDir is null) return;
@@ -542,7 +564,7 @@ internal static class Program
             await Task.CompletedTask;
         }));
 
-        steps.Add(new Step(n++, "Add theme.css file (Step 40)", async ctx =>
+    steps.Add(new Step(n++, "Add theme.css file (Step 42)", async ctx =>
         {
             var (_, webDir) = ResolveProjectDirs(ctx);
             if (webDir is null) return;
@@ -554,14 +576,14 @@ internal static class Program
             await Task.CompletedTask;
         }));
 
-        steps.Add(new Step(n++, "Add UseStaticFiles (Step 41)", ctx => ModifyWebProgram(ctx, content =>
+    steps.Add(new Step(n++, "Add UseStaticFiles (Step 43)", ctx => ModifyWebProgram(ctx, content =>
         {
             if (!content.Contains("UseStaticFiles()", StringComparison.Ordinal))
                 content = InsertAfterLineContaining(content, "var app = builder.Build()", "app.UseStaticFiles();");
             return content;
         })));
 
-        steps.Add(new Step(n++, "Link theme.css in head (Step 42)", async ctx =>
+    steps.Add(new Step(n++, "Link theme.css in head (Step 44)", async ctx =>
         {
             var file = ResolveWebComponent(ctx, "PhotoList.razor");
             if (file is null) return;
@@ -574,7 +596,7 @@ internal static class Program
             await Task.CompletedTask;
         }));
 
-        steps.Add(new Step(n++, "Replace PhotoList.razor with final UI (Step 43)", async ctx =>
+    steps.Add(new Step(n++, "Replace PhotoList.razor with final UI (Step 45)", async ctx =>
         {
             var file = ResolveWebComponent(ctx, "PhotoList.razor");
             if (file is null) return;
@@ -586,7 +608,7 @@ internal static class Program
             await Task.CompletedTask;
         }));
 
-        steps.Add(new Step(n++, "Replace theme.css with dark theme (Step 44)", async ctx =>
+    steps.Add(new Step(n++, "Replace theme.css with dark theme (Step 46)", async ctx =>
         {
             var (_, webDir) = ResolveProjectDirs(ctx);
             if (webDir is null) return;
@@ -601,7 +623,7 @@ internal static class Program
             await Task.CompletedTask;
         }));
 
-        steps.Add(new Step(n++, "Final verification (Step 45)", ctx => ManualPause()));
+    steps.Add(new Step(n++, "Final verification (Step 47)", ctx => ManualPause()));
 
         return steps;
     }
