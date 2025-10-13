@@ -185,7 +185,7 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     ```cs
     using Azure.Storage.Blobs;
     ```
-26. `PG.Web.Program.cs` update `app.MapGet` to be the following.
+26. `PG.Web.Program.cs` add the code below above `app.Run();`.
     ```cs
         app.MapGet("/photos/{*name}", async (string name, BlobContainerClient client) =>
         {

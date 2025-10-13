@@ -369,22 +369,21 @@ internal static class Program
 
         steps.Add(new Step(n++, "Ensure using Azure.Storage.Blobs (Step 25)", ctx => ModifyWebProgram(ctx, content => EnsureUsing(content, "using Azure.Storage.Blobs;"))));
 
-        steps.Add(new Step(n++, "Add photo file-serving endpoint /photos (Step 26)", ctx => ModifyWebProgram(ctx, content =>
+        steps.Add(new Step(n++, "Add /photos/{*name} endpoint above app.Run() (Step 26)", ctx => ModifyWebProgram(ctx, content =>
         {
-            // Ensure root MapGet enumerates blobs (if not already transformed)
-            if (!content.Contains("GetBlobsAsync", StringComparison.Ordinal))
+            // Idempotent: if endpoint already present, do nothing
+            if (content.Contains("app.MapGet(\"/photos/{*name}\"", StringComparison.Ordinal))
+                return content;
+
+            var endpoint = "app.MapGet(\"/photos/{*name}\", async (string name, BlobContainerClient client) =>\n{\n    if (string.IsNullOrWhiteSpace(name))\n    {\n        return Results.BadRequest();\n    }\n\n    var blob = client.GetBlobClient(name);\n    if (!await blob.ExistsAsync())\n    {\n        return Results.NotFound();\n    }\n\n    // Try to infer a simple content type from the extension; fall back to octet-stream\n    var contentType = GetContentType(name);\n    var stream = await blob.OpenReadAsync();\n    return Results.File(stream, contentType);\n});";
+
+            if (content.Contains("app.Run();", StringComparison.Ordinal))
             {
-                content = EnsureUsing(content, "using PhotoGallery.Web.Components;");
-                content = EnsureUsing(content, "using Microsoft.AspNetCore.Http.HttpResults;");
-                var map = "app.MapGet(\"/\", async (BlobContainerClient client) =>\n    {\n        var blobs = client.GetBlobsAsync();\n        var photos = new List<string>();\n        await foreach(var photo in blobs)\n        {\n            photos.Add(photo.Name);\n        }\n        return new RazorComponentResult<PhotoList>(new {Photos = photos } );\n    });";
-                content = ReplaceMapGet(content, map);
+                content = InsertBeforeLineContaining(content, "app.Run();", endpoint);
             }
-            // Add /photos/{*name} endpoint for serving individual blobs
-            if (!content.Contains("/photos/{*name}", StringComparison.Ordinal))
+            else
             {
-                var endpoint = "app.MapGet(\"/photos/{*name}\", async (string name, BlobContainerClient client) =>\n{\n    if (string.IsNullOrWhiteSpace(name))\n        return Results.BadRequest();\n    var blob = client.GetBlobClient(name);\n    if (!await blob.ExistsAsync())\n        return Results.NotFound();\n    var contentType = GetContentType(name);\n    var stream = await blob.OpenReadAsync();\n    return Results.File(stream, contentType);\n});";
-                // Insert after existing root MapGet if possible
-                content = InsertAfterLineContaining(content, "app.MapGet(\"/\"", endpoint, allowMultiple: true);
+                content += "\n" + endpoint + "\n"; // Fallback append
             }
             return content;
         })));
