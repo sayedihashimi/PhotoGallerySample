@@ -72,7 +72,7 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
    - Name: `PhotoGallery`
    - Path: `.\`
    - Template version: `daily`
-   - Copilot: For this step call `aspire new aspire`. When you invoke it, invoke it in a way
+   - Copilot: For this step call `aspire new aspire -n PhotoGallery -o ./`. When you invoke it, invoke it in a way
             that the user can interact with it and complete the interaction.
 5. If you are using VS, open the solution file that was created by `aspire run`
 6. Use the command below to create the Razor Pages web app. In VS select `ASP.NET Core Empty (9.0)` as the project template. When using in VS make sure to check "Enlist in Aspire Orchestration".
@@ -273,7 +273,7 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     ```
     @using Microsoft.AspNetCore.Components.Forms
     ```
-37. `PG.Web.PhotoList.razor` – Add on a new line after the line contining the `<form>` tag.
+37. `PG.Web.PhotoList.razor` – Add on a new line after the line contining the `<form class="upload-form"` tag.
     ```html
     <AntiforgeryToken />
     ```
