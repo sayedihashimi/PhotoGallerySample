@@ -1,3 +1,17 @@
+var builder = WebApplication.CreateBuilder(args);
+//builder.Services.AddRazorComponents();
+var app = builder.Build();
+
+/*
+app.MapGet("/", () =>
+{
+    return new RazorComponentResult<PhotoList>(new { Photos = Array.Empty<string>() });
+});
+*/
+
+app.Run();
+
+/*
 using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Http.HttpResults;
 using WebApplication1.Components;
@@ -10,7 +24,9 @@ builder.Services.AddAntiforgery();
 
 var app = builder.Build();
 app.MapDefaultEndpoints();
+
 app.UseAntiforgery();
+
 
 app.MapGet("/", async (BlobContainerClient client) =>
 {
@@ -35,5 +51,6 @@ app.MapPost("/upload", async (IFormFile photo, BlobContainerClient client) =>
 });
 
 
-
 app.Run();
+
+*/

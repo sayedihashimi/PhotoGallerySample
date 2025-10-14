@@ -1,35 +1,57 @@
-# PhotoGallary Setup
+---
+mode: 'agent'
+model: GPT-5
+description: 'Generate a new console app that will execute test script'
+---
 
-Below are steps to recreate the PhotoGallery Aspire app. You can also use the command line tool in the `src` directory
-to assist you in recreating the PhotoGallery app.
+Your goal is to generate a new .NET 10 Console app which can be used to simplify testing `dotnet watch` and Hot Reload.
+Below in `Script instructions` there is a set of manual instructions that a tester will follow to run an end-to-end test.
+You will create a .NET Core console app that uses Spectre.Console (https://spectreconsole.net/). This console app will be
+interactive. For each step below you'll:
+
+1. Show the text of the step
+2. Show this list of commands 
+   1. Execute step (default)
+   2. Go back
+   3. Quit
+
+If the user selects `Execute step` you'll perform that step. If there are any manual steps, make it clear that the user needs to take
+a specfic action. When the step is executed, you'll proceed to the next step.
+The steps are designed to be run from start to finish.
+You don't need to create any interface to let users pick certain steps to execute.
+
+When the app first starts, show the info in Prereqs and wait for the user to perform those steps.
+
+The goal is to automate as much of this as possible.
+
+The code that you generate should go in the folder `src-tester`. Any project you create, should be
+in a subfolder.
+
+When you think you are done generating code the code **MUST** build successfully. If there are build
+errors, edit the code until there are no build errors.
+
+If you run powershell, pwsh, you should always pass in `-NoProfile`.
+
+Do **NOT** reference any of the files in these folders
+- `assets`
+- `src`
+You **MUST** ignore those files.
+
+### Script instructions
+
+# PhotoGallary Setup
 
 ## Prereqs
 1. Install the [latest dotnet](https://github.com/dotnet/dotnet/blob/main/docs/builds-table.md)
 1. Install the [latest daily aspire ](https://github.com/dotnet/aspire/blob/main/docs/using-latest-daily.md)
 
-## Test Script Runner (Experimental)
-An interactive console utility has been added at `src/PhotoGalleryScriptRunner` to help guide and (when possible) automate the demo steps below.
-
-It uses Spectre.Console to present each step with options:
-1. Execute step (runs commands or performs file generation when possible)
-2. Go back
-3. Quit
-
-Some steps remain manual (for example the fully interactive `aspire new` flow, or detailed source edits later in the list). For those, the runner shows the instructions and lets you mark the step complete.
-
-### Running the test runner
-Requires a .NET 10 (preview) SDK. If you don't have it yet, you can temporarily edit the tester csproj to target `net9.0`.
-
-```pwsh
-dotnet run --project .\src\PhotoGalleryScriptRunner\PhotoGalleryScriptRunner.csproj
-```
-
-When prompted, supply (or create) an empty working folder. The runner will create / modify files inside that folder—NOT inside this repository—so you can quickly validate the scenario from scratch.
-
-## Manual Steps to recreate the PhotoGallery app
+## Demo Steps
 To reproduce the PhotoGallery using the dotnet CLI, all steps are below. When running a command, run it from the new directory that you create in step 1.
 
+To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start with step 5 in VS.
+
 1. Create, or open, an empty folder.
+   1. Copilot: For this step, prompt the user to provide the path to the folder to use.
 2. Create a `Directory.Build.props` with the content below.
     ```xml
     <Project>
@@ -50,6 +72,8 @@ To reproduce the PhotoGallery using the dotnet CLI, all steps are below. When ru
    - Name: `PhotoGallery`
    - Path: `.\`
    - Template version: `daily`
+   - Copilot: For this step call `aspire new aspire -n PhotoGallery -o ./`. When you invoke it, invoke it in a way
+            that the user can interact with it and complete the interaction.
 5. If you are using VS, open the solution file that was created by `aspire run`
 6. Use the command below to create the Razor Pages web app. In VS select `ASP.NET Core Empty (9.0)` as the project template. When using in VS make sure to check "Enlist in Aspire Orchestration".
     ```bash
@@ -65,6 +89,7 @@ To reproduce the PhotoGallery using the dotnet CLI, all steps are below. When ru
     ```bash
     dotnet add reference --project .\PhotoGallery.AppHost\PhotoGallery.AppHost.csproj .\PhotoGallery.Web\PhotoGallery.Web.csproj
     ```
+    Copilot: run the command in the snippet above for this step.
 11. `AppHost.cs` add after `var builder = …`
     ```cs
     builder.AddProject<Projects.PhotoGallery_Web>("webapp");
@@ -172,8 +197,7 @@ To reproduce the PhotoGallery using the dotnet CLI, all steps are below. When ru
         }
         return new RazorComponentResult<PhotoList>(new {Photos = photos } );
     });
-    ```
-27. `PG.Web.PhotoList.razor` – replace with the code below
+29. `PG.Web.PhotoList.razor` – replace with the code below
     ```
     @code
     {
@@ -209,19 +233,19 @@ To reproduce the PhotoGallery using the dotnet CLI, all steps are below. When ru
     </body>
     </html>
     ```
-28. `PG.Web`: add Project Reference to ServiceDefaults project. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
+30. `PG.Web`: add Project Reference to ServiceDefaults project. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
     ```bash
     dotnet add reference --project .\PhotoGallery.Web\PhotoGallery.Web.csproj .\PhotoGallery.ServiceDefaults\PhotoGallery.ServiceDefaults.csproj
     ```
-29. `PG.Web.Program.cs` add after `var builder = …`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
+31. `PG.Web.Program.cs` add after `var builder = …`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
     ```cs
     builder.AddServiceDefaults();
     ```
-30. `PG.Web.Program.cs` add after `var app = builder.Build()`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
+32. `PG.Web.Program.cs` add after `var app = builder.Build()`. In VS if you checked "Enlist in Aspire" in the New Project Dialog for the web project, you can skip this step.
     ```cs
     app.MapDefaultEndpoints();
     ```
-31. `PG.Web.Program.cs` add after `app.MapGet …`
+33. `PG.Web.Program.cs` before the line 'app.Run();' add the code below
     ```cs
     app.MapPost("/upload", async (IFormFile photo, BlobContainerClient client) =>
     {
@@ -234,41 +258,83 @@ To reproduce the PhotoGallery using the dotnet CLI, all steps are below. When ru
         return Results.Redirect("/");
     });
     ```
-32. Verify in the dashboard that Traces has webapp showing up in the Resource dropdown.
-33. If you try webapp, you’ll get antiforgery errors. The exception should be in Structured logs in the dashboard.
-34. `PG.Web.Program.cs` – add before `var app = builder.Build();`
+34. Verify in the dashboard that Traces has webapp showing up in the Resource dropdown.
+35. If you try webapp, you’ll get antiforgery errors. The exception should be in Structured logs in the dashboard.
+36. `PG.Web.Program.cs` – add before `var app = builder.Build();`
     ```cs
     builder.Services.AddAntiforgery();
     ```
-35. `PG.Web.Program.cs` – add after `var app = builder.Build()`
+37. `PG.Web.Program.cs` – add after `var app = builder.Build()`
     ```cs
     app.UseAntiforgery();
     ```
-36. `PG.Web.PhotoList.razor` – add using at the top of the file. _Skip if using VS. VS Shoud insert this on paste automatically._
+38. `PG.Web.PhotoList.razor` – add using at the top of the file. _Skip if using VS. VS Shoud insert this on paste automatically._
     ```
     @using Microsoft.AspNetCore.Components.Forms
     ```
-37. `PG.Web.PhotoList.razor` – add immediately after opening `<form>` tag.
+39. `PG.Web.PhotoList.razor` – Add on a new line after the line contining the `<form class="upload-form"` tag.
     ```html
     <AntiforgeryToken />
     ```
-38. The app should be working, after uploading an image, the file name should be listed on the web page.
-39. `PG.Web` - add a `wwwroot` folder
-40. `PG.Web` - add a new file at `wwwroot/theme.css`, with the content below
+40. `PG.Web.Program.cs` add the code below above `app.Run();`.
+    ```cs
+        app.MapGet("/photos/{*name}", async (string name, BlobContainerClient client) =>
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return Results.BadRequest();
+            }
+
+            var blob = client.GetBlobClient(name);
+            if (!await blob.ExistsAsync())
+            {
+                return Results.NotFound();
+            }
+
+            // Try to infer a simple content type from the extension; fall back to octet-stream
+            var contentType = GetContentType(name);
+            var stream = await blob.OpenReadAsync();
+            return Results.File(stream, contentType);
+        });
+    ```
+41. `PG.Web.Program.cs` - add the using statement below at the top of the file.
+    ```cs
+    using System.IO
+    ```
+42. `PG.Web.Program.cs` - add after `app.Run();`
+    ```cs
+    static string GetContentType(string name)
+    {
+        var ext = Path.GetExtension(name).ToLowerInvariant();
+        return ext switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".gif" => "image/gif",
+            ".webp" => "image/webp",
+            ".bmp" => "image/bmp",
+            ".svg" => "image/svg+xml",
+            _ => "application/octet-stream"
+        };
+    }
+    ```
+43. The app should be working, after uploading an image, the file name should be listed on the web page.
+44. `PG.Web` - add a `wwwroot` folder
+45. `PG.Web` - add a new file at `wwwroot/theme.css`, with the content below
     ```css
     body {
         background-color: gray;
     }
     ```
-41. `PG.Web.Program.cs` - add after `var app = builder.Build()`
+47. `PG.Web.Program.cs` - add after `var app = builder.Build()`
     ```cs
     app.UseStaticFiles();
     ```
-42. `PG.Web.PhotoList.razor` - add in `<head>`
+48. `PG.Web.PhotoList.razor` - add in `<head>`
     ```html
     <link rel="stylesheet" href="/theme.css"/>
     ```
-43. `PG.Web.PhotoList.razor` - replace with the code below
+49. `PG.Web.PhotoList.razor` - replace with the code below
     ```
     @using Microsoft.AspNetCore.Components.Forms
     @code {
@@ -351,7 +417,7 @@ To reproduce the PhotoGallery using the dotnet CLI, all steps are below. When ru
     </body>
     </html>
     ```
-44. `PG.Web.wwwroot.theme.css` - replace with the content below
+50. `PG.Web.wwwroot.theme.css` - replace with the content below
     ```css
     /* Global dark theme tokens */
     :root {
@@ -396,4 +462,4 @@ To reproduce the PhotoGallery using the dotnet CLI, all steps are below. When ru
     ul.gallery { list-style: none !important; margin: 0; padding: 0; }
     ul.gallery > li { list-style: none !important; }
     ```
-45. The app should be working now.
+51. The app should be working now.
