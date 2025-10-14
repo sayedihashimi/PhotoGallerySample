@@ -24,7 +24,7 @@ When the app first starts, show the info in Prereqs and wait for the user to per
 
 The goal is to automate as much of this as possible.
 
-The code that you generate should go in the folder `src-tester`. Any project you create, should be
+The code that you generate should go in the folder `src`. Any project you create, should be
 in a subfolder.
 
 When you think you are done generating code the code **MUST** build successfully. If there are build
@@ -34,7 +34,8 @@ If you run powershell, pwsh, you should always pass in `-NoProfile`.
 
 Do **NOT** reference any of the files in these folders
 - `assets`
-- `src`
+- `sample`
+  
 You **MUST** ignore those files.
 
 ### Script instructions
