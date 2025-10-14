@@ -1,21 +1,14 @@
 # PhotoGallary Setup
 
-The final version of the code is at https://github.com/sayedihashimi/PhotoGallerySample/tree/main.
+Below are steps to recreate the PhotoGallery Aspire app. You can also use the command line tool in the `src` directory
+to assist you in recreating the PhotoGallery app.
 
 ## Prereqs
 1. Install the [latest dotnet](https://github.com/dotnet/dotnet/blob/main/docs/builds-table.md)
 1. Install the [latest daily aspire ](https://github.com/dotnet/aspire/blob/main/docs/using-latest-daily.md)
-1. If using VS add the following NuGet package source in Tools > Options name=`dotnet10` value=`https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet10/nuget/v3/index.json`.
-
-## Getting started
-You can either follow the steps below to start from scratch below. Or you can start with the code in the [start-here](https://github.com/sayedihashimi/PhotoGallerySample/tree/start-here) branch.
-When using the `start-here` branch, start with step 4 below.
-The `start-here` branch has comments for all the code that will be added. 
-There is also a [PhotoList.razor.txt](assets/PhotoList.razor.txt) in the assets folder. This is a version of the
-PhotoList.razor file that has code to get started and some commented out code that you can paste in later.
 
 ## Test Script Runner (Experimental)
-An interactive console utility has been added at `src-tester/PhotoGallery.TestRunner` to help guide and (when possible) automate the 45 demo steps below.
+An interactive console utility has been added at `src/PhotoGalleryScriptRunner` to help guide and (when possible) automate the demo steps below.
 
 It uses Spectre.Console to present each step with options:
 1. Execute step (runs commands or performs file generation when possible)
@@ -28,17 +21,13 @@ Some steps remain manual (for example the fully interactive `aspire new` flow, o
 Requires a .NET 10 (preview) SDK. If you don't have it yet, you can temporarily edit the tester csproj to target `net9.0`.
 
 ```pwsh
-dotnet run --project .\src-tester\PhotoGallery.TestRunner\PhotoGallery.TestRunner.csproj
+dotnet run --project .\src\PhotoGalleryScriptRunner\PhotoGalleryScriptRunner.csproj
 ```
 
 When prompted, supply (or create) an empty working folder. The runner will create / modify files inside that folder—NOT inside this repository—so you can quickly validate the scenario from scratch.
 
-> Note: Commands that invoke PowerShell use `-NoProfile` per guidelines. Output from executed steps is captured and shown. Errors will stop a step but you can retry after fixing the environment.
-
-## Demo Steps
+## Manual Steps to recreate the PhotoGallery app
 To reproduce the PhotoGallery using the dotnet CLI, all steps are below. When running a command, run it from the new directory that you create in step 1.
-
-To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start with step 5 in VS.
 
 1. Create, or open, an empty folder.
 2. Create a `Directory.Build.props` with the content below.
