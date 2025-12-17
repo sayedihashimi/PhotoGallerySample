@@ -123,11 +123,20 @@ internal static class Program
             await RunPwsh("aspire config set features.defaultWatchEnabled true -g", ctx.WorkingDirectory!);
         }));
 
-        steps.Add(new Step(n++, "Run 'aspire new' interactively to scaffold solution (Step 4)", async ctx =>
+        steps.Add(new Step(n++, "Run 'dotnet new' to scaffold solution (Step 4)", async ctx =>
         {
             EnsureWorking(ctx);
-            AnsiConsole.MarkupLine("Launching interactive 'aspire new' (choose template: AppHost and service defaults; Name: PhotoGallery; Path: .\\ ; Template version: daily). Complete prompts then return here.");
-            await RunInteractiveProcess("pwsh", "-NoProfile -Command \"aspire new -n PhotoGallery -o ./ \"", ctx.WorkingDirectory!);
+            // AnsiConsole.MarkupLine("Launching interactive 'aspire new' (choose template: AppHost and service defaults; Name: PhotoGallery; Path: .\\ ; Template version: daily). Complete prompts then return here.");
+            // await RunInteractiveProcess("pwsh", "-NoProfile -Command \"aspire new -n PhotoGallery -o ./ \"", ctx.WorkingDirectory!);
+
+            AnsiConsole.MarkupLine("Creating the AppHost and Service Defaults project using 'dotnet new'");            
+            // await RunInteractiveProcess("pwsh", "-NoProfile -Command \"dotnet new aspire -n PhotoGallery -o ./ \"", ctx.WorkingDirectory!);
+            await RunPwsh($"dotnet new aspire -n PhotoGallery -o ./", ctx.WorkingDirectory!);
+
+            //AnsiConsole.MarkupLine("Creating the AppHost and Service Defaults project using 'dotnet new'");
+            // await RunInteractiveProcess("pwsh", "-NoProfile -Command \"dotnet new sln -n PhotoGallery -o ./ \"", ctx.WorkingDirectory!);
+            //await RunPwsh($"dotnet new sln -n PhotoGallery -o ./ ", ctx.WorkingDirectory!);
+
             AnsiConsole.MarkupLine("If generation succeeded you should now have a solution (e.g. PhotoGallery.sln).");
         }));
 
@@ -135,7 +144,7 @@ internal static class Program
         steps.Add(new Step(n++, "Create Razor Pages web app (Step 6)", async ctx =>
         {
             EnsureWorking(ctx);
-            var cmd = "dotnet new web -o PhotoGallery.Web -f net9.0"; // per script requirement
+            var cmd = "dotnet new web -o PhotoGallery.Web -f net10.0"; // per script requirement
             await RunPwsh(cmd, ctx.WorkingDirectory!);
         }));
         steps.Add(new Step(n++, "Add web project to solution (Step 7, skip if using VS)", async ctx =>
@@ -147,6 +156,8 @@ internal static class Program
                 AnsiConsole.MarkupLine("[yellow]No solution file found; skipping add project.[/]");
                 return;
             }
+            // await RunPwsh($"dotnet sln \"{Path.GetFileName(sln)}\" add .\\PhotoGallery.AppHost\\PhotoGallery.AppHost.csproj", ctx.WorkingDirectory!);
+            // await RunPwsh($"dotnet sln \"{Path.GetFileName(sln)}\" add .\\PhotoGallery.ServiceDefaults\\PhotoGallery.ServiceDefaults.csproj", ctx.WorkingDirectory!);
             await RunPwsh($"dotnet sln \"{Path.GetFileName(sln)}\" add .\\PhotoGallery.Web\\PhotoGallery.Web.csproj", ctx.WorkingDirectory!);
         }));
         // Steps 8 & 9 remain manual (watch run + dashboard initial state)
@@ -224,7 +235,7 @@ internal static class Program
             var txt = File.ReadAllText(appHostCs);
             if (!txt.Contains("AddAzureStorage", StringComparison.Ordinal))
             {
-                var snippet = "var photos = builder.AddAzureStorage(\"storage\")\n                        .RunAsEmulator()\n                        .AddBlobs(\"blobs\")\n                        .AddBlobContainer(\"photos\");";
+                var snippet = "var photos = builder.AddAzureStorage(\"storage\")\n                        .RunAsEmulator()\n                        .AddBlobContainer(\"photos\");";
                 txt = InsertAfterLineContaining(txt, "var builder", snippet);
                 File.WriteAllText(appHostCs, txt);
                 AnsiConsole.MarkupLine("Inserted storage resource code.");

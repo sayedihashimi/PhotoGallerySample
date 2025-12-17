@@ -80,7 +80,6 @@ To reproduce the PhotoGallery using the dotnet CLI, all steps are below. When ru
     ```cs
     var photos = builder.AddAzureStorage("storage")
                         .RunAsEmulator()
-                        .AddBlobs("blobs")
                         .AddBlobContainer("photos");
     ```
 15. `PG.Web.Program.cs` – add after the first line (`var builder = …`)

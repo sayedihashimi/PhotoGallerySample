@@ -106,7 +106,6 @@ To reproduce the PhotoGallery in VS, follow the steps through step 4. Then start
     ```cs
     var photos = builder.AddAzureStorage("storage")
                         .RunAsEmulator()
-                        .AddBlobs("blobs")
                         .AddBlobContainer("photos");
     ```
 15. `PG.Web.Program.cs` – add after the first line (`var builder = …`)
