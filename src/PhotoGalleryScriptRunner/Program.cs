@@ -126,17 +126,8 @@ internal static class Program
         steps.Add(new Step(n++, "Run 'dotnet new' to scaffold solution (Step 4)", async ctx =>
         {
             EnsureWorking(ctx);
-            // AnsiConsole.MarkupLine("Launching interactive 'aspire new' (choose template: AppHost and service defaults; Name: PhotoGallery; Path: .\\ ; Template version: daily). Complete prompts then return here.");
-            // await RunInteractiveProcess("pwsh", "-NoProfile -Command \"aspire new -n PhotoGallery -o ./ \"", ctx.WorkingDirectory!);
-
             AnsiConsole.MarkupLine("Creating the AppHost and Service Defaults project using 'dotnet new'");            
-            // await RunInteractiveProcess("pwsh", "-NoProfile -Command \"dotnet new aspire -n PhotoGallery -o ./ \"", ctx.WorkingDirectory!);
-            await RunPwsh($"dotnet new aspire -n PhotoGallery -o ./", ctx.WorkingDirectory!);
-
-            //AnsiConsole.MarkupLine("Creating the AppHost and Service Defaults project using 'dotnet new'");
-            // await RunInteractiveProcess("pwsh", "-NoProfile -Command \"dotnet new sln -n PhotoGallery -o ./ \"", ctx.WorkingDirectory!);
-            //await RunPwsh($"dotnet new sln -n PhotoGallery -o ./ ", ctx.WorkingDirectory!);
-
+            await RunPwsh($"dotnet new aspire -n PhotoGallery --localhost-tld -o ./", ctx.WorkingDirectory!);
             AnsiConsole.MarkupLine("If generation succeeded you should now have a solution (e.g. PhotoGallery.sln).");
         }));
 
@@ -156,8 +147,6 @@ internal static class Program
                 AnsiConsole.MarkupLine("[yellow]No solution file found; skipping add project.[/]");
                 return;
             }
-            // await RunPwsh($"dotnet sln \"{Path.GetFileName(sln)}\" add .\\PhotoGallery.AppHost\\PhotoGallery.AppHost.csproj", ctx.WorkingDirectory!);
-            // await RunPwsh($"dotnet sln \"{Path.GetFileName(sln)}\" add .\\PhotoGallery.ServiceDefaults\\PhotoGallery.ServiceDefaults.csproj", ctx.WorkingDirectory!);
             await RunPwsh($"dotnet sln \"{Path.GetFileName(sln)}\" add .\\PhotoGallery.Web\\PhotoGallery.Web.csproj", ctx.WorkingDirectory!);
         }));
         // Steps 8 & 9 remain manual (watch run + dashboard initial state)
